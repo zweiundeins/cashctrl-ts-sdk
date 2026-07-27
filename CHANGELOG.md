@@ -10,6 +10,12 @@ in minor releases as response inference improves.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-27
+
+**Upgrade from 0.1.0.** Every `delete` method in 0.1.0 was named `delete_` and
+so was unreachable in practice, and 16 read endpoints returned the raw
+response envelope instead of the payload. Both are fixed here.
+
 ### Added
 
 - npm publishing alongside JSR, built with `@deno/dnt`. The package ships ESM
@@ -72,7 +78,9 @@ in minor releases as response inference improves.
 
 ## [0.1.0] - 2026-07-27
 
-Initial release.
+Initial release. **Superseded by 0.2.0; do not use.** All 33 `delete` methods
+were generated as `delete_` and 16 read endpoints did not unwrap their
+response envelope.
 
 ### Added
 
@@ -115,5 +123,6 @@ Initial release.
   Response types are inferred from one organisation's live data across 95 of
   376 endpoints, so they are best-effort. See the README's Caveats section.
 
-[Unreleased]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/releases/tag/v0.1.0
