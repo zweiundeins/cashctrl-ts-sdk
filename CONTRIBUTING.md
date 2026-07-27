@@ -109,8 +109,29 @@ composes with shell conditionals.
    - **JSR** via OIDC. No token secret, but the package must be linked to this
      GitHub repo in its jsr.io settings first.
    - **npm** via dnt, which rewrites the `.ts` import extensions and emits
-     ESM + CJS + declarations. Needs an `NPM_TOKEN` repository secret with
-     publish rights on the `@zweiundeins` scope. Published with provenance.
+     ESM + CJS + declarations. Authenticated by npm trusted publishing
+     (OIDC), so there is no `NPM_TOKEN` secret. Published with provenance.
+
+### First npm release
+
+npm trusted publishing can only be configured on a package that already
+exists, so version 0.1.0 has to be pushed by hand once:
+
+```sh
+npm login                                # browser flow, no token needed
+deno task build:npm
+npm publish ./npm --access public
+```
+
+The `@zweiundeins` npm organisation must exist first; create it at
+<https://www.npmjs.com/org/create> (free for public packages).
+
+Afterwards, on npmjs.com go to the package's **Settings > Trusted Publisher**
+and add: organisation `zweiundeins`, repository `cashctrl-ts-sdk`, workflow
+`publish.yml`. Every later release then publishes from CI with no secret.
+
+Note that trusted publishing needs npm >= 11.5.1; Node 22 bundles npm 11.0, so
+the workflow upgrades npm explicitly before publishing.
 
 Build the npm package locally with `deno task build:npm`; the output lands in
 `./npm` (gitignored) and is publishable with `npm publish ./npm`.
