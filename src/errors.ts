@@ -1,3 +1,13 @@
+/**
+ * Error types for the CashCtrl SDK.
+ *
+ * Note that these deliberately avoid TypeScript parameter properties
+ * (`constructor(readonly x: number)`). Parameter properties emit code rather
+ * than only erasing types, so they break runtimes that strip types without
+ * transpiling, such as `node --experimental-strip-types`. Fields are declared
+ * and assigned explicitly to keep the source erasable-only.
+ */
+
 /** Field-level validation error as returned by CashCtrl write endpoints. */
 export interface FieldError {
   field: string | null;
@@ -17,12 +27,15 @@ export class CashCtrlError extends Error {
  */
 export class CashCtrlHttpError extends CashCtrlError {
   override readonly name: string = "CashCtrlHttpError";
-  constructor(
-    readonly status: number,
-    readonly path: string,
-    readonly body: string,
-  ) {
+  readonly status: number;
+  readonly path: string;
+  readonly body: string;
+
+  constructor(status: number, path: string, body: string) {
     super(`CashCtrl ${status} on ${path}: ${body.slice(0, 500)}`);
+    this.status = status;
+    this.path = path;
+    this.body = body;
   }
 }
 
@@ -34,16 +47,19 @@ export class CashCtrlHttpError extends CashCtrlError {
  */
 export class CashCtrlValidationError extends CashCtrlError {
   override readonly name: string = "CashCtrlValidationError";
-  constructor(
-    readonly path: string,
-    readonly errors: FieldError[],
-    /** The top-level `message`, when CashCtrl sends one. */
-    readonly detail?: string,
-  ) {
+  readonly path: string;
+  readonly errors: FieldError[];
+  /** The top-level `message`, when CashCtrl sends one. */
+  readonly detail?: string;
+
+  constructor(path: string, errors: FieldError[], detail?: string) {
     const summary = errors.length
       ? errors.map((e) => `${e.field ?? "_"}: ${e.message}`).join("; ")
       : detail ?? "request was not successful";
     super(`CashCtrl validation failed on ${path}: ${summary}`);
+    this.path = path;
+    this.errors = errors;
+    this.detail = detail;
   }
 
   /** Errors grouped by field name, for form binding. */
@@ -65,12 +81,15 @@ export class CashCtrlAuthError extends CashCtrlHttpError {
 /** HTTP 429. `retryAfter` is in seconds when the server sent the header. */
 export class CashCtrlRateLimitError extends CashCtrlHttpError {
   override readonly name = "CashCtrlRateLimitError";
+  readonly retryAfter?: number;
+
   constructor(
     status: number,
     path: string,
     body: string,
-    readonly retryAfter?: number,
+    retryAfter?: number,
   ) {
     super(status, path, body);
+    this.retryAfter = retryAfter;
   }
 }

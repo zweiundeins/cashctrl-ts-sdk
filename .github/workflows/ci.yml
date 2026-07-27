@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Lint, typecheck and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Format
+        run: deno fmt --check
+
+      - name: Lint
+        run: deno lint
+
+      - name: Typecheck
+        run: deno check src/mod.ts scripts/*.ts
+
+      - name: Test
+        run: deno test --allow-net tests/
+
+      - name: Verify the package publishes to JSR
+        run: deno publish --dry-run
+
+  generated:
+    name: Generated output is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # Regenerating from the committed spec/*.json must be a no-op. This
+      # catches hand-edits to src/generated/** and generator changes that
+      # were not re-run before committing. No network needed: the scraped
+      # and probed specs are in the repo.
+      - name: Regenerate
+        run: deno task generate
+
+      - name: Fail if regeneration changed anything
+        run: |
+          if ! git diff --exit-code --stat; then
+            echo "::error::Generated files are stale. Run 'deno task generate' and commit the result."
+            exit 1
+          fi
+
+  openapi:
+    name: OpenAPI spec is valid
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - run: npx --yes @redocly/cli@latest lint spec/openapi.json
+
+  compat:
+    name: Runs on Node and Bun
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - uses: oven-sh/setup-bun@v2
+
+      # The SDK claims to be runtime-agnostic; prove it on every push.
+      - name: Node
+        run: node --experimental-strip-types tests/compat/smoke.mts
+
+      - name: Bun
+        run: bun run tests/compat/smoke.mts

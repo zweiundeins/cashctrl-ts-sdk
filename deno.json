@@ -1,13 +1,17 @@
 {
-  "name": "@zweiundeins/cashctrl",
+  "name": "@zweiundeins/cashctrl-ts-sdk",
   "version": "0.1.0",
   "license": "MIT",
   "exports": {
     ".": "./src/mod.ts"
   },
+  "compilerOptions": {
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true
+  },
   "publish": {
-    "include": ["src", "README.md", "LICENSE", "deno.json", "spec/openapi.json"],
-    "exclude": ["spec/docs-cache.html"]
+    "include": ["src", "README.md", "LICENSE", "deno.json"],
+    "exclude": ["spec", "scripts", "tests"]
   },
   "tasks": {
     "scrape": "deno run --allow-read --allow-write --allow-net scripts/scrape-docs.ts",
@@ -16,7 +20,9 @@
     "build": "deno task scrape && deno task generate",
     "smoke": "deno run --allow-read --allow-net --allow-env --env-file scripts/smoke-test.ts",
     "test": "deno test --allow-net tests/",
-    "check": "deno check src/mod.ts scripts/*.ts && deno lint && deno fmt --check"
+    "test:compat": "deno run --allow-net tests/compat/smoke.mts",
+    "check": "deno check src/mod.ts scripts/*.ts && deno lint && deno fmt --check",
+    "ci": "deno task check && deno task test && deno task test:compat && deno publish --dry-run --allow-dirty"
   },
   "lint": {
     "include": ["src", "scripts", "tests"],

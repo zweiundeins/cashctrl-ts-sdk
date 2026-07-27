@@ -1,0 +1,59 @@
+# Changelog
+
+All notable changes to this project are documented here.
+
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+While the version is below `1.0.0`, generated type names and shapes may change
+in minor releases as response inference improves.
+
+## [Unreleased]
+
+## [0.1.0] - 2026-07-27
+
+Initial release.
+
+### Added
+
+- Typed client covering all **376 CashCtrl API endpoints**, generated from the
+  published HTML reference. Resources mirror the API's own path structure, so
+  `POST /api/v1/account/costcenter/category/create.json` is
+  `cc.account.costcenter.category.create({...})`.
+- **OpenAPI 3.1 document** (`spec/openapi.json`) for all 376 endpoints,
+  validated with `redocly lint`. CashCtrl publishes no official spec.
+- Three-stage generation pipeline: `scrape-docs.ts` parses the HTML reference,
+  `probe-api.ts` infers response shapes from live read-only calls, and
+  `generate.ts` emits the SDK and the spec.
+- Request parameter types for all 342 endpoints that take parameters,
+  including documented enums, defaults, max lengths and nested JSON shapes.
+- Entity types for 74 resources, inferred from live responses.
+- Transport handling for the API's quirks: form-encoded bodies despite JSON
+  responses, `JSON` params serialized to JSON strings, `CSV` params joined
+  with commas, `Date` objects formatted as `YYYY-MM-DD`, and an explicit
+  `null` sent as an empty string to clear a field (as distinct from
+  `undefined`, which omits it).
+- Validation failures arrive from CashCtrl as HTTP 200 with `success: false`;
+  these are promoted to a thrown `CashCtrlValidationError` carrying per-field
+  messages via `byField()`.
+- `CashCtrlAuthError` (401/403), `CashCtrlRateLimitError` (429) and
+  `CashCtrlHttpError` for transport failures, with automatic exponential
+  backoff on 429 and 5xx.
+- Helpers for CashCtrl's localized-text format, which encodes translations as
+  `<values><de>Kasse</de><en>Cash</en></values>` rather than JSON:
+  `localize`, `parseLocalized`, `toLocalized` and `isLocalized`.
+- Document endpoints (PDF/XLSX/CSV/ZIP/vCard) return the raw `Response` for
+  streaming.
+- `cc.http` escape hatch for calling endpoints directly.
+
+### Notes
+
+- Zero dependencies, `fetch`-only. Verified on Deno 2.7, Node 22 and Bun 1.3.
+- The source is erasable-syntax-only (`erasableSyntaxOnly` is enforced at
+  typecheck), so it runs under `node --experimental-strip-types`.
+- Request parameters come from the official docs and are authoritative.
+  Response types are inferred from one organisation's live data across 95 of
+  376 endpoints, so they are best-effort. See the README's Caveats section.
+
+[Unreleased]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/releases/tag/v0.1.0
