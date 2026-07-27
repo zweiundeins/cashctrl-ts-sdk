@@ -29,7 +29,7 @@ jobs:
           deno fmt --check
           deno lint
           deno check src/mod.ts scripts/*.ts
-          deno test --allow-net tests/
+          deno test --allow-read --allow-net tests/
           deno run --allow-net tests/compat/smoke.mts
 
   jsr:

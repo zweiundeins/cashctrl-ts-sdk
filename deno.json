@@ -28,7 +28,7 @@
     "generate": "deno run --allow-read --allow-write scripts/generate.ts",
     "build": "deno task scrape && deno task generate",
     "smoke": "deno run --allow-read --allow-net --allow-env --env-file scripts/smoke-test.ts",
-    "test": "deno test --allow-net tests/",
+    "test": "deno test --allow-read --allow-net tests/",
     "test:compat": "deno run --allow-net tests/compat/smoke.mts",
     "build:npm": "deno run -A scripts/build-npm.ts",
     "check": "deno check src/mod.ts scripts/*.ts && deno lint && deno fmt --check",

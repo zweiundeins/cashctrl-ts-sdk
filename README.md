@@ -213,6 +213,40 @@ namely `fiscalperiod/reopen_months.json` (reopens closed months) and
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
+## Testing and coverage
+
+Be clear-eyed about what is and is not verified.
+
+| Layer | Coverage | How |
+| --- | --- | --- |
+| Request construction | **376/376 (100%)** | `tests/contract_test.ts`, mock transport |
+| Response shapes | 95/376 (25%) | live read-only probing, one organisation |
+| Writes executed against the API | **0/192 (0%)** | not done |
+
+`tests/contract_test.ts` calls every generated method with every documented
+parameter and asserts the HTTP verb, the exact URL path, that each parameter
+reaches the wire, and that it is encoded the way CashCtrl expects. Expected
+encodings are spelled out by hand rather than by reusing the SDK's own
+serializer, so a bug cannot be mirrored into the expectation.
+
+It is mutation-tested. Each of these deliberate faults is caught, with the
+number of endpoints that flag it:
+
+| Injected fault | Endpoints failing |
+| --- | --- |
+| One endpoint path corrupted | 1 |
+| A POST issued as a GET | 42 |
+| `true` encoded as `1` | 410 |
+| Dates as `DD.MM.YYYY` | 83 |
+| CSV joined with `;` | 140 |
+| One parameter silently dropped | 54 |
+
+**What none of this proves is that CashCtrl accepts the requests.** No write
+endpoint has ever been executed. The 192 POST endpoints are verified only in
+the sense that the SDK sends what the documentation describes; whether the
+server is happy with it is untested. Treat writes as unproven until you have
+run them against a throwaway organisation.
+
 ## Caveats
 
 These are the honest limits of generating from a source never meant to be

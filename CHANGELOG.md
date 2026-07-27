@@ -30,6 +30,11 @@ in minor releases as response inference improves.
   params and dropping read-only ones like `created` and `subTotal`.
 - `scripts/overrides.ts`, a small reviewed list of places where CashCtrl's
   documentation contradicts the API's real behaviour, each with its evidence.
+- `tests/contract_test.ts`, which calls all 376 generated methods against a
+  mock transport and asserts the HTTP verb, URL path, parameter transmission
+  and encoding for every documented parameter. Expected encodings are written
+  independently of the SDK's serializer so a bug cannot be mirrored into the
+  expectation. Mutation-tested against six injected faults.
 
 ### Fixed
 

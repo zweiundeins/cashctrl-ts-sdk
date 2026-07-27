@@ -29,7 +29,7 @@ jobs:
         run: deno check src/mod.ts scripts/*.ts
 
       - name: Test
-        run: deno test --allow-net tests/
+        run: deno test --allow-read --allow-net tests/
 
       - name: Verify the package publishes to JSR
         run: deno publish --dry-run

@@ -48,7 +48,7 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         run: |
           deno check src/mod.ts
-          deno test --allow-net tests/
+          deno test --allow-read --allow-net tests/
           deno run --allow-net tests/compat/smoke.mts
 
       - name: Build the PR body
