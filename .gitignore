@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+node_modules/
+npm/
+coverage/
+
+# Refetched on demand by `deno task scrape` (1.2 MB).
+spec/docs-cache.html

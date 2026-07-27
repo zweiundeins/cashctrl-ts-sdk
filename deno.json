@@ -1,0 +1,32 @@
+{
+  "name": "@zweiundeins/cashctrl",
+  "version": "0.1.0",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/mod.ts"
+  },
+  "publish": {
+    "include": ["src", "README.md", "LICENSE", "deno.json", "spec/openapi.json"],
+    "exclude": ["spec/docs-cache.html"]
+  },
+  "tasks": {
+    "scrape": "deno run --allow-read --allow-write --allow-net scripts/scrape-docs.ts",
+    "probe": "deno run --allow-read --allow-write --allow-net --allow-env --env-file scripts/probe-api.ts",
+    "generate": "deno run --allow-read --allow-write scripts/generate.ts",
+    "build": "deno task scrape && deno task generate",
+    "smoke": "deno run --allow-read --allow-net --allow-env --env-file scripts/smoke-test.ts",
+    "test": "deno test --allow-net tests/",
+    "check": "deno check src/mod.ts scripts/*.ts && deno lint && deno fmt --check"
+  },
+  "lint": {
+    "include": ["src", "scripts", "tests"],
+    "exclude": ["src/generated"]
+  },
+  "fmt": {
+    "include": ["src", "scripts", "tests"],
+    "exclude": ["src/generated"]
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1"
+  }
+}
