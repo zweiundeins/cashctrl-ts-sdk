@@ -10,6 +10,18 @@ in minor releases as response inference improves.
 
 ## [Unreleased]
 
+### Added
+
+- npm publishing alongside JSR, built with `@deno/dnt`. The package ships ESM
+  and CommonJS with declarations, has zero dependencies and needs Node 18+.
+  Verified consumable from plain Node in both module systems, and TypeScript
+  declarations resolve for npm consumers.
+- Weekly `upstream` workflow that re-scrapes the CashCtrl reference,
+  regenerates, and opens a PR when the API changed.
+- `scripts/diff-spec.ts`, which renders the difference between two scraped
+  specs as a readable summary (endpoints added or removed, parameters added,
+  removed or retyped) rather than an unreadable generated-code diff.
+
 ## [0.1.0] - 2026-07-27
 
 Initial release.

@@ -1,0 +1,88 @@
+name: Watch upstream API
+
+# CashCtrl ships API changes without announcing them, so re-scrape their
+# reference weekly and open a PR when it moved. Scraping needs no API key.
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Re-scrape the published reference
+        run: |
+          cp spec/api.json /tmp/api-previous.json
+          deno task scrape -- --refresh
+
+      - name: Summarize what changed
+        id: diff
+        run: |
+          if deno run --allow-read --allow-write scripts/diff-spec.ts \
+               /tmp/api-previous.json spec/api.json --out /tmp/summary.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+          cat /tmp/summary.md
+
+      # Regenerating uses the OLD spec/responses.json, so response types for
+      # any brand-new endpoint fall back to `unknown` until someone runs
+      # `deno task probe` against a real organisation. That is called out in
+      # the PR body rather than silently accepted.
+      - name: Regenerate the SDK
+        if: steps.diff.outputs.changed == 'true'
+        run: deno task generate
+
+      - name: Verify the regenerated SDK still builds
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          deno check src/mod.ts
+          deno test --allow-net tests/
+          deno run --allow-net tests/compat/smoke.mts
+
+      - name: Build the PR body
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          {
+            echo "The CashCtrl API reference changed upstream. This PR was"
+            echo "opened automatically by \`.github/workflows/upstream.yml\`."
+            echo
+            cat /tmp/summary.md
+            echo
+            echo "---"
+            echo
+            echo "## Before merging"
+            echo
+            echo "- [ ] Review the \`spec/api.json\` diff, which is the real change."
+            echo "- [ ] Run \`deno task probe\` against an organisation so new"
+            echo "      endpoints get real response types instead of \`unknown\`,"
+            echo "      then \`deno task generate\` and push to this branch."
+            echo "- [ ] Note anything breaking (removed endpoints, params that"
+            echo "      became mandatory) in \`CHANGELOG.md\`."
+          } > /tmp/pr-body.md
+
+      - name: Open a pull request
+        if: steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: upstream-api-changes
+          title: "chore: sync with upstream CashCtrl API changes"
+          body-path: /tmp/pr-body.md
+          commit-message: "chore: sync generated SDK with upstream API changes"
+          labels: upstream
+          delete-branch: true
+          add-paths: |
+            spec/api.json
+            spec/openapi.json
+            src/generated

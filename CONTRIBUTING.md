@@ -78,10 +78,39 @@ properties (`constructor(readonly x: number)`), `enum`, and namespaces.
 `erasableSyntaxOnly` is enabled in `deno.json`, so `deno check` catches
 violations, and `deno task test:compat` runs the SDK on Deno, Node and Bun.
 
+## Upstream changes
+
+`.github/workflows/upstream.yml` re-scrapes the CashCtrl reference every
+Monday and opens a PR when it moved. `scripts/diff-spec.ts` renders the change
+as a readable summary that becomes the PR body.
+
+Note that the automated PR regenerates against the *existing*
+`spec/responses.json`, so response types for brand-new endpoints come out as
+`unknown`. Run `deno task probe` against a real organisation and push to the
+PR branch before merging if you want them typed. The PR checklist says so.
+
+To check by hand:
+
+```sh
+cp spec/api.json /tmp/before.json
+deno task scrape -- --refresh
+deno run --allow-read --allow-write scripts/diff-spec.ts /tmp/before.json spec/api.json
+```
+
+`diff-spec.ts` exits 1 when there are changes, 0 when there are none, so it
+composes with shell conditionals.
+
 ## Releasing
 
 1. Bump `version` in `deno.json` and add a `CHANGELOG.md` entry.
 2. Commit, then tag: `git tag v0.2.0 && git push --tags`.
-3. The publish workflow verifies the tag matches `deno.json` and publishes to
-   JSR via OIDC. No token secret is involved, but the JSR package must be
-   linked to this GitHub repo in its JSR settings first.
+3. The publish workflow verifies the tag matches `deno.json`, then publishes to
+   both registries:
+   - **JSR** via OIDC. No token secret, but the package must be linked to this
+     GitHub repo in its jsr.io settings first.
+   - **npm** via dnt, which rewrites the `.ts` import extensions and emits
+     ESM + CJS + declarations. Needs an `NPM_TOKEN` repository secret with
+     publish rights on the `@zweiundeins` scope. Published with provenance.
+
+Build the npm package locally with `deno task build:npm`; the output lands in
+`./npm` (gitignored) and is publishable with `npm publish ./npm`.

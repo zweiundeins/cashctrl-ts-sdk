@@ -1,4 +1,4 @@
-name: Publish to JSR
+name: Publish
 
 on:
   push:
@@ -6,13 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish:
+  verify:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      # Required for JSR's OIDC auth: no token secret needed, but the package
-      # must be linked to this repo at https://jsr.io/@zweiundeins/cashctrl-ts-sdk/settings
-      id-token: write
     steps:
       - uses: actions/checkout@v7
       - uses: denoland/setup-deno@v2
@@ -20,6 +15,7 @@ jobs:
           deno-version: v2.x
 
       - name: Verify the tag matches deno.json
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           tag="${GITHUB_REF_NAME#v}"
           version="$(deno eval 'console.log(JSON.parse(Deno.readTextFileSync("deno.json")).version)')"
@@ -27,14 +23,53 @@ jobs:
             echo "::error::Tag $GITHUB_REF_NAME does not match deno.json version $version"
             exit 1
           fi
-        if: startsWith(github.ref, 'refs/tags/v')
 
-      - name: Test before publishing
+      - name: Test
         run: |
           deno fmt --check
           deno lint
           deno check src/mod.ts scripts/*.ts
           deno test --allow-net tests/
+          deno run --allow-net tests/compat/smoke.mts
+
+  jsr:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # JSR authenticates via OIDC, so there is no token secret. The package
+      # must be linked to this repo in its jsr.io settings first.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno publish
+
+  npm:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Enables npm provenance attestation.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      # dnt rewrites the .ts import extensions and emits ESM + CJS + types,
+      # producing an ordinary npm package with no Deno dependency.
+      - name: Build with dnt
+        run: deno task build:npm
 
       - name: Publish
-        run: deno publish
+        run: npm publish ./npm --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

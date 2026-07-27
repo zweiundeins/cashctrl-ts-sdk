@@ -67,6 +67,51 @@ jobs:
           node-version: 22
       - run: npx --yes @redocly/cli@latest lint spec/openapi.json
 
+  npm-build:
+    name: npm package builds and is consumable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Build with dnt
+        run: deno task build:npm
+
+      # Prove the built package works from plain Node, in both module systems,
+      # with no Deno and no TypeScript involved.
+      - name: Consume the built package
+        run: |
+          mkdir -p /tmp/consumer && cd /tmp/consumer
+          npm init -y >/dev/null
+          npm install "$GITHUB_WORKSPACE/npm" >/dev/null
+          cat > esm.mjs <<'JS'
+          import { CashCtrl, localize, toLocalized } from "@zweiundeins/cashctrl-ts-sdk";
+          const cc = new CashCtrl({ organisation: "o", apiKey: "k", retry: { attempts: 0 },
+            fetch: () => Promise.resolve(new Response(JSON.stringify({ success: true, data: [{ id: 1 }] }),
+              { headers: { "content-type": "application/json" } })) });
+          const rows = await cc.account.list();
+          if (rows.length !== 1) throw new Error("ESM: unexpected result");
+          if (localize(toLocalized({ en: "Cash" }), "en") !== "Cash") throw new Error("ESM: localize failed");
+          console.log("ESM ok");
+          JS
+          cat > cjs.cjs <<'JS'
+          const { CashCtrl } = require("@zweiundeins/cashctrl-ts-sdk");
+          const cc = new CashCtrl({ organisation: "o", apiKey: "k", retry: { attempts: 0 },
+            fetch: () => Promise.resolve(new Response(JSON.stringify({ success: true, data: [{ id: 1 }] }),
+              { headers: { "content-type": "application/json" } })) });
+          cc.account.list().then((r) => {
+            if (r.length !== 1) { throw new Error("CJS: unexpected result"); }
+            console.log("CJS ok");
+          });
+          JS
+          node esm.mjs
+          node cjs.cjs
+
   compat:
     name: Runs on Node and Bun
     runs-on: ubuntu-latest

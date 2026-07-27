@@ -1,6 +1,7 @@
 # cashctrl-ts-sdk
 
 [![JSR](https://jsr.io/badges/@zweiundeins/cashctrl-ts-sdk)](https://jsr.io/@zweiundeins/cashctrl-ts-sdk)
+[![npm](https://img.shields.io/npm/v/@zweiundeins/cashctrl-ts-sdk)](https://www.npmjs.com/package/@zweiundeins/cashctrl-ts-sdk)
 [![CI](https://github.com/zweiundeins/cashctrl-ts-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/zweiundeins/cashctrl-ts-sdk/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -18,15 +19,22 @@ Zero dependencies, `fetch`-only. Verified on Deno 2.7, Node 22 and Bun 1.3.
 
 ## Install
 
+Published to both registries from the same source.
+
 ```sh
-deno add jsr:@zweiundeins/cashctrl-ts-sdk   # Deno
-npx jsr add @zweiundeins/cashctrl-ts-sdk    # Node
-bunx jsr add @zweiundeins/cashctrl-ts-sdk   # Bun
+deno add jsr:@zweiundeins/cashctrl-ts-sdk    # Deno
+npm  install @zweiundeins/cashctrl-ts-sdk    # Node
+bun  add     @zweiundeins/cashctrl-ts-sdk    # Bun
+pnpm add     @zweiundeins/cashctrl-ts-sdk
 ```
 
 ```ts
 import { CashCtrl } from "@zweiundeins/cashctrl-ts-sdk";
 ```
+
+The npm build ships ESM and CommonJS with `.d.ts` declarations, has zero
+dependencies, and requires Node 18+. It does not depend on Deno at install or
+run time. The SDK source uses no Deno APIs; only the build tooling is Deno.
 
 You need an API key: in CashCtrl, go to **Settings > Users & Roles > Add >
 Add API user**. The key is scoped to a single organisation and inherits the
@@ -179,7 +187,21 @@ deno task generate    # regenerate from the committed specs (offline)
 deno task scrape      # re-scrape the docs (--refresh bypasses the cache)
 deno task probe       # re-probe response shapes (needs an API key)
 deno task test        # unit tests, no network
+deno task build:npm   # build the npm package into ./npm
 deno task ci          # everything CI runs
+```
+
+### Staying in sync with upstream
+
+CashCtrl ships API changes without announcing them, so
+[`.github/workflows/upstream.yml`](.github/workflows/upstream.yml) re-scrapes
+their reference every Monday, regenerates, and opens a PR when anything moved.
+`scripts/diff-spec.ts` turns the change into a readable summary (endpoints
+added or removed, parameters added, removed or retyped) that becomes the PR
+body, so the generated-code diff never has to be read directly.
+
+```sh
+deno run --allow-read --allow-write scripts/diff-spec.ts old.json new.json
 ```
 
 `deno task probe` is **read-only by construction**: it calls only GET endpoints

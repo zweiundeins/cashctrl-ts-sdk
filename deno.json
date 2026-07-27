@@ -10,8 +10,17 @@
     "verbatimModuleSyntax": true
   },
   "publish": {
-    "include": ["src", "README.md", "LICENSE", "deno.json"],
-    "exclude": ["spec", "scripts", "tests"]
+    "include": [
+      "src",
+      "README.md",
+      "LICENSE",
+      "deno.json"
+    ],
+    "exclude": [
+      "spec",
+      "scripts",
+      "tests"
+    ]
   },
   "tasks": {
     "scrape": "deno run --allow-read --allow-write --allow-net scripts/scrape-docs.ts",
@@ -21,18 +30,32 @@
     "smoke": "deno run --allow-read --allow-net --allow-env --env-file scripts/smoke-test.ts",
     "test": "deno test --allow-net tests/",
     "test:compat": "deno run --allow-net tests/compat/smoke.mts",
+    "build:npm": "deno run -A scripts/build-npm.ts",
     "check": "deno check src/mod.ts scripts/*.ts && deno lint && deno fmt --check",
     "ci": "deno task check && deno task test && deno task test:compat && deno publish --dry-run --allow-dirty"
   },
   "lint": {
-    "include": ["src", "scripts", "tests"],
-    "exclude": ["src/generated"]
+    "include": [
+      "src",
+      "scripts",
+      "tests"
+    ],
+    "exclude": [
+      "src/generated"
+    ]
   },
   "fmt": {
-    "include": ["src", "scripts", "tests"],
-    "exclude": ["src/generated"]
+    "include": [
+      "src",
+      "scripts",
+      "tests"
+    ],
+    "exclude": [
+      "src/generated"
+    ]
   },
   "imports": {
-    "@std/assert": "jsr:@std/assert@^1"
+    "@std/assert": "jsr:@std/assert@^1",
+    "@deno/dnt": "jsr:@deno/dnt@^0.42"
   }
 }
