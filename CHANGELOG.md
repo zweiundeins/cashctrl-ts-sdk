@@ -35,9 +35,32 @@ in minor releases as response inference improves.
   and encoding for every documented parameter. Expected encodings are written
   independently of the SDK's serializer so a bug cannot be mirrored into the
   expectation. Mutation-tested against six injected faults.
+- `scripts/roundtrip-test.ts` (`deno task roundtrip`), which performs real
+  create/read/update/updatePreserving/delete cycles against a live
+  organisation and verifies nothing is left behind. Safe on a production
+  organisation by construction: it is limited to master data with no
+  accounting effect and no sequence-assigned `nr`, because creating an order,
+  person, article or salary statement consumes a sequence number that
+  deletion does not return.
 
 ### Fixed
 
+- **Every `delete` endpoint was generated as `delete_`.** The generator
+  escaped JavaScript keywords, but keywords are reserved for identifiers, not
+  for method names: `delete(...)` is a legal class member. All 33 delete
+  methods were therefore named something no caller would reach for. Found by a
+  live round-trip that called `.delete()`, silently deleted nothing, and left
+  records behind. The contract test had missed it because it resolved methods
+  through the same naming function, so it looked up `delete_`, found it, and
+  passed; there is now a separate test asserting idiomatic CRUD names spelled
+  out by hand.
+- **20 `read`/`list`/`tree` endpoints returned the raw `{success, data}`
+  envelope** instead of the unwrapped payload, because live probing had failed
+  or been skipped for them. Whether a method unwrapped its response therefore
+  depended on which organisation happened to be probed, so
+  `file.category.read()` behaved unlike `tax.read()` for no visible reason.
+  Unwrapping now follows the API's documented convention by verb; probe
+  evidence only refines the element type.
 - Nested response fields that were `null` in every sample stayed `unknown` and
   were unusable at a call site. Widening now recurses into nested objects and
   arrays, so `order.items[].articleNr` and `tax.rates[].dateValid` get their

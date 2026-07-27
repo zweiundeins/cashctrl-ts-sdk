@@ -100,7 +100,7 @@ export class AccountBankResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/account/bank/delete.json
    */
-  delete_(params: M.AccountBankDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.AccountBankDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/account/bank/delete.json", params, signal);
   }
 
@@ -237,7 +237,7 @@ export class AccountCategoryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/account/category/delete.json
    */
-  delete_(params: M.AccountCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.AccountCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/account/category/delete.json", params, signal);
   }
 
@@ -338,7 +338,7 @@ export class AccountCostcenterCategoryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/account/costcenter/category/delete.json
    */
-  delete_(params: M.AccountCostcenterCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.AccountCostcenterCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/account/costcenter/category/delete.json", params, signal);
   }
 
@@ -359,8 +359,8 @@ export class AccountCostcenterCategoryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/account/costcenter/category/read.json
    */
-  read(params: M.AccountCostcenterCategoryReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/account/costcenter/category/read.json", params, signal);
+  async read(params: M.AccountCostcenterCategoryReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/account/costcenter/category/read.json", params, signal)).data;
   }
 
   /**
@@ -443,7 +443,7 @@ export class AccountCostcenterResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/account/costcenter/delete.json
    */
-  delete_(params: M.AccountCostcenterDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.AccountCostcenterDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/account/costcenter/delete.json", params, signal);
   }
 
@@ -498,8 +498,8 @@ export class AccountCostcenterResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/account/costcenter/read.json
    */
-  read(params: M.AccountCostcenterReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/account/costcenter/read.json", params, signal);
+  async read(params: M.AccountCostcenterReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/account/costcenter/read.json", params, signal)).data;
   }
 
   /**
@@ -590,7 +590,7 @@ export class AccountResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/account/delete.json
    */
-  delete_(params: M.AccountDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.AccountDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/account/delete.json", params, signal);
   }
 
@@ -728,7 +728,7 @@ export class CurrencyResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/currency/delete.json
    */
-  delete_(params: M.CurrencyDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.CurrencyDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/currency/delete.json", params, signal);
   }
 
@@ -831,7 +831,7 @@ export class CustomfieldGroupResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/customfield/group/delete.json
    */
-  delete_(params: M.CustomfieldGroupDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.CustomfieldGroupDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/customfield/group/delete.json", params, signal);
   }
 
@@ -853,8 +853,8 @@ export class CustomfieldGroupResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/customfield/group/read.json
    */
-  read(params: M.CustomfieldGroupReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/customfield/group/read.json", params, signal);
+  async read(params: M.CustomfieldGroupReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/customfield/group/read.json", params, signal)).data;
   }
 
   /**
@@ -916,7 +916,7 @@ export class CustomfieldResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/customfield/delete.json
    */
-  delete_(params: M.CustomfieldDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.CustomfieldDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/customfield/delete.json", params, signal);
   }
 
@@ -927,8 +927,8 @@ export class CustomfieldResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/customfield/list.json
    */
-  list(params: M.CustomfieldListParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/customfield/list.json", params, signal);
+  list(params: M.CustomfieldListParams, signal?: AbortSignal): Promise<unknown[]> {
+    return this.#http.list<unknown>("/api/v1/customfield/list.json", params, signal);
   }
 
   /**
@@ -938,8 +938,8 @@ export class CustomfieldResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/customfield/read.json
    */
-  read(params: M.CustomfieldReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/customfield/read.json", params, signal);
+  async read(params: M.CustomfieldReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/customfield/read.json", params, signal)).data;
   }
 
   /**
@@ -1040,7 +1040,7 @@ export class FileCategoryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/file/category/delete.json
    */
-  delete_(params: M.FileCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.FileCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/file/category/delete.json", params, signal);
   }
 
@@ -1061,8 +1061,8 @@ export class FileCategoryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/file/category/read.json
    */
-  read(params: M.FileCategoryReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/file/category/read.json", params, signal);
+  async read(params: M.FileCategoryReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/file/category/read.json", params, signal)).data;
   }
 
   /**
@@ -1135,7 +1135,7 @@ export class FileResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/file/delete.json
    */
-  delete_(params: M.FileDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.FileDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/file/delete.json", params, signal);
   }
 
@@ -1239,8 +1239,8 @@ export class FileResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/file/read.json
    */
-  read(params: M.FileReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/file/read.json", params, signal);
+  async read(params: M.FileReadParams, signal?: AbortSignal): Promise<M.File> {
+    return (await this.#http.get<{ data: M.File }>("/api/v1/file/read.json", params, signal)).data;
   }
 
   /**
@@ -1318,7 +1318,7 @@ export class FiscalperiodTaskResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/fiscalperiod/task/delete.json
    */
-  delete_(params: M.FiscalperiodTaskDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.FiscalperiodTaskDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/fiscalperiod/task/delete.json", params, signal);
   }
 
@@ -1416,7 +1416,7 @@ export class FiscalperiodResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/fiscalperiod/delete.json
    */
-  delete_(params: M.FiscalperiodDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.FiscalperiodDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/fiscalperiod/delete.json", params, signal);
   }
 
@@ -1429,8 +1429,8 @@ export class FiscalperiodResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/fiscalperiod/depreciations.json
    */
-  depreciations(params: M.FiscalperiodDepreciationsParams, signal?: AbortSignal): Promise<unknown[]> {
-    return this.#http.list<unknown>("/api/v1/fiscalperiod/depreciations.json", params, signal);
+  async depreciations(params: M.FiscalperiodDepreciationsParams, signal?: AbortSignal): Promise<unknown[]> {
+    return (await this.#http.get<{ data: unknown[] }>("/api/v1/fiscalperiod/depreciations.json", params, signal)).data;
   }
 
   /**
@@ -1443,8 +1443,8 @@ export class FiscalperiodResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/fiscalperiod/exchangediff.json
    */
-  exchangediff(params?: M.FiscalperiodExchangediffParams, signal?: AbortSignal): Promise<unknown[]> {
-    return this.#http.list<unknown>("/api/v1/fiscalperiod/exchangediff.json", params, signal);
+  async exchangediff(params?: M.FiscalperiodExchangediffParams, signal?: AbortSignal): Promise<unknown[]> {
+    return (await this.#http.get<{ data: unknown[] }>("/api/v1/fiscalperiod/exchangediff.json", params, signal)).data;
   }
 
   /**
@@ -1514,7 +1514,7 @@ export class FiscalperiodResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/fiscalperiod/switch.json
    */
-  switch_(params: M.FiscalperiodSwitchParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  switch(params: M.FiscalperiodSwitchParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/fiscalperiod/switch.json", params, signal);
   }
 
@@ -1603,7 +1603,7 @@ export class InventoryArticleCategoryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/inventory/article/category/delete.json
    */
-  delete_(params: M.InventoryArticleCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.InventoryArticleCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/inventory/article/category/delete.json", params, signal);
   }
 
@@ -1713,8 +1713,8 @@ export class InventoryArticleImportResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/inventory/article/import/mapping_combo.json
    */
-  mappingCombo(params?: Record<string, never>, signal?: AbortSignal): Promise<M.InventoryArticleImportMappingComboResult[]> {
-    return this.#http.list<M.InventoryArticleImportMappingComboResult>("/api/v1/inventory/article/import/mapping_combo.json", undefined, signal);
+  async mappingCombo(params?: Record<string, never>, signal?: AbortSignal): Promise<M.InventoryArticleImportMappingComboResult[]> {
+    return (await this.#http.get<{ data: M.InventoryArticleImportMappingComboResult[] }>("/api/v1/inventory/article/import/mapping_combo.json", undefined, signal)).data;
   }
 
   /**
@@ -1749,12 +1749,12 @@ export class InventoryArticleResource {
   /** Nested `inventory/article/category` endpoints. */
   readonly category: InventoryArticleCategoryResource;
   /** Nested `inventory/article/import` endpoints. */
-  readonly import_: InventoryArticleImportResource;
+  readonly import: InventoryArticleImportResource;
 
   constructor(http: CashCtrlHttp) {
     this.#http = http;
     this.category = new InventoryArticleCategoryResource(http);
-    this.import_ = new InventoryArticleImportResource(http);
+    this.import = new InventoryArticleImportResource(http);
   }
 
   /**
@@ -1789,7 +1789,7 @@ export class InventoryArticleResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/inventory/article/delete.json
    */
-  delete_(params: M.InventoryArticleDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.InventoryArticleDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/inventory/article/delete.json", params, signal);
   }
 
@@ -1926,7 +1926,7 @@ export class InventoryAssetCategoryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/inventory/asset/category/delete.json
    */
-  delete_(params: M.InventoryAssetCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.InventoryAssetCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/inventory/asset/category/delete.json", params, signal);
   }
 
@@ -1947,8 +1947,8 @@ export class InventoryAssetCategoryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/inventory/asset/category/read.json
    */
-  read(params: M.InventoryAssetCategoryReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/inventory/asset/category/read.json", params, signal);
+  async read(params: M.InventoryAssetCategoryReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/inventory/asset/category/read.json", params, signal)).data;
   }
 
   /**
@@ -2019,7 +2019,7 @@ export class InventoryAssetResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/inventory/asset/delete.json
    */
-  delete_(params: M.InventoryAssetDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.InventoryAssetDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/inventory/asset/delete.json", params, signal);
   }
 
@@ -2082,8 +2082,8 @@ export class InventoryAssetResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/inventory/asset/read.json
    */
-  read(params: M.InventoryAssetReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/inventory/asset/read.json", params, signal);
+  async read(params: M.InventoryAssetReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/inventory/asset/read.json", params, signal)).data;
   }
 
   /**
@@ -2140,7 +2140,7 @@ export class InventoryUnitResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/inventory/unit/delete.json
    */
-  delete_(params: M.InventoryUnitDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.InventoryUnitDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/inventory/unit/delete.json", params, signal);
   }
 
@@ -2253,7 +2253,7 @@ export class JournalImportEntryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/journal/import/entry/delete.json
    */
-  delete_(params: M.JournalImportEntryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.JournalImportEntryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/journal/import/entry/delete.json", params, signal);
   }
 
@@ -2275,8 +2275,8 @@ export class JournalImportEntryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/journal/import/entry/list.json
    */
-  list(params: M.JournalImportEntryListParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/journal/import/entry/list.json", params, signal);
+  list(params: M.JournalImportEntryListParams, signal?: AbortSignal): Promise<unknown[]> {
+    return this.#http.list<unknown>("/api/v1/journal/import/entry/list.json", params, signal);
   }
 
   /**
@@ -2308,8 +2308,8 @@ export class JournalImportEntryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/journal/import/entry/read.json
    */
-  read(params: M.JournalImportEntryReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/journal/import/entry/read.json", params, signal);
+  async read(params: M.JournalImportEntryReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/journal/import/entry/read.json", params, signal)).data;
   }
 
   /**
@@ -2417,11 +2417,11 @@ export class JournalImportResource {
 export class JournalResource {
   readonly #http: CashCtrlHttp;
   /** Nested `journal/import` endpoints. */
-  readonly import_: JournalImportResource;
+  readonly import: JournalImportResource;
 
   constructor(http: CashCtrlHttp) {
     this.#http = http;
-    this.import_ = new JournalImportResource(http);
+    this.import = new JournalImportResource(http);
   }
 
   /**
@@ -2445,7 +2445,7 @@ export class JournalResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/journal/delete.json
    */
-  delete_(params: M.JournalDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.JournalDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/journal/delete.json", params, signal);
   }
 
@@ -2596,7 +2596,7 @@ export class LocationResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/location/delete.json
    */
-  delete_(params: M.LocationDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.LocationDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/location/delete.json", params, signal);
   }
 
@@ -2686,7 +2686,7 @@ export class OrderBookentryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/order/bookentry/delete.json
    */
-  delete_(params: M.OrderBookentryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.OrderBookentryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/order/bookentry/delete.json", params, signal);
   }
 
@@ -2697,8 +2697,8 @@ export class OrderBookentryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/order/bookentry/list.json
    */
-  list(params: M.OrderBookentryListParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/order/bookentry/list.json", params, signal);
+  list(params: M.OrderBookentryListParams, signal?: AbortSignal): Promise<unknown[]> {
+    return this.#http.list<unknown>("/api/v1/order/bookentry/list.json", params, signal);
   }
 
   /**
@@ -2708,8 +2708,8 @@ export class OrderBookentryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/order/bookentry/read.json
    */
-  read(params: M.OrderBookentryReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/order/bookentry/read.json", params, signal);
+  async read(params: M.OrderBookentryReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/order/bookentry/read.json", params, signal)).data;
   }
 
   /**
@@ -2756,7 +2756,7 @@ export class OrderCategoryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/order/category/delete.json
    */
-  delete_(params: M.OrderCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.OrderCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/order/category/delete.json", params, signal);
   }
 
@@ -2868,8 +2868,8 @@ export class OrderDocumentResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/order/document/read.json
    */
-  read(params: M.OrderDocumentReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/order/document/read.json", params, signal);
+  async read(params: M.OrderDocumentReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/order/document/read.json", params, signal)).data;
   }
 
   /**
@@ -2937,7 +2937,7 @@ export class OrderLayoutResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/order/layout/delete.json
    */
-  delete_(params: M.OrderLayoutDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.OrderLayoutDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/order/layout/delete.json", params, signal);
   }
 
@@ -3066,7 +3066,7 @@ export class OrderResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/order/continue.json
    */
-  continue_(params: M.OrderContinueParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  continue(params: M.OrderContinueParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/order/continue.json", params, signal);
   }
 
@@ -3089,7 +3089,7 @@ export class OrderResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/order/delete.json
    */
-  delete_(params: M.OrderDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.OrderDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/order/delete.json", params, signal);
   }
 
@@ -3282,7 +3282,7 @@ export class PersonCategoryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/person/category/delete.json
    */
-  delete_(params: M.PersonCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.PersonCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/person/category/delete.json", params, signal);
   }
 
@@ -3392,8 +3392,8 @@ export class PersonImportResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/person/import/mapping_combo.json
    */
-  mappingCombo(params?: Record<string, never>, signal?: AbortSignal): Promise<M.PersonImportMappingComboResult[]> {
-    return this.#http.list<M.PersonImportMappingComboResult>("/api/v1/person/import/mapping_combo.json", undefined, signal);
+  async mappingCombo(params?: Record<string, never>, signal?: AbortSignal): Promise<M.PersonImportMappingComboResult[]> {
+    return (await this.#http.get<{ data: M.PersonImportMappingComboResult[] }>("/api/v1/person/import/mapping_combo.json", undefined, signal)).data;
   }
 
   /**
@@ -3450,7 +3450,7 @@ export class PersonTitleResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/person/title/delete.json
    */
-  delete_(params: M.PersonTitleDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.PersonTitleDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/person/title/delete.json", params, signal);
   }
 
@@ -3518,14 +3518,14 @@ export class PersonResource {
   /** Nested `person/category` endpoints. */
   readonly category: PersonCategoryResource;
   /** Nested `person/import` endpoints. */
-  readonly import_: PersonImportResource;
+  readonly import: PersonImportResource;
   /** Nested `person/title` endpoints. */
   readonly title: PersonTitleResource;
 
   constructor(http: CashCtrlHttp) {
     this.#http = http;
     this.category = new PersonCategoryResource(http);
-    this.import_ = new PersonImportResource(http);
+    this.import = new PersonImportResource(http);
     this.title = new PersonTitleResource(http);
   }
 
@@ -3560,7 +3560,7 @@ export class PersonResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/person/delete.json
    */
-  delete_(params: M.PersonDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.PersonDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/person/delete.json", params, signal);
   }
 
@@ -3707,7 +3707,7 @@ export class ReportCollectionResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/report/collection/delete.json
    */
-  delete_(params: M.ReportCollectionDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.ReportCollectionDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/report/collection/delete.json", params, signal);
   }
 
@@ -3779,8 +3779,8 @@ export class ReportCollectionResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/report/collection/read.json
    */
-  read(params: M.ReportCollectionReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/report/collection/read.json", params, signal);
+  async read(params: M.ReportCollectionReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/report/collection/read.json", params, signal)).data;
   }
 
   /**
@@ -3860,7 +3860,7 @@ export class ReportElementResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/report/element/delete.json
    */
-  delete_(params: M.ReportElementDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.ReportElementDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/report/element/delete.json", params, signal);
   }
 
@@ -3932,8 +3932,8 @@ export class ReportElementResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/report/element/read.json
    */
-  read(params: M.ReportElementReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/report/element/read.json", params, signal);
+  async read(params: M.ReportElementReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/report/element/read.json", params, signal)).data;
   }
 
   /**
@@ -4016,7 +4016,7 @@ export class RoundingResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/rounding/delete.json
    */
-  delete_(params: M.RoundingDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.RoundingDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/rounding/delete.json", params, signal);
   }
 
@@ -4106,7 +4106,7 @@ export class SalaryBookentryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/bookentry/delete.json
    */
-  delete_(params: M.SalaryBookentryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.SalaryBookentryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/bookentry/delete.json", params, signal);
   }
 
@@ -4117,8 +4117,8 @@ export class SalaryBookentryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/bookentry/list.json
    */
-  list(params: M.SalaryBookentryListParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/salary/bookentry/list.json", params, signal);
+  list(params: M.SalaryBookentryListParams, signal?: AbortSignal): Promise<unknown[]> {
+    return this.#http.list<unknown>("/api/v1/salary/bookentry/list.json", params, signal);
   }
 
   /**
@@ -4128,8 +4128,8 @@ export class SalaryBookentryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/bookentry/read.json
    */
-  read(params: M.SalaryBookentryReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/salary/bookentry/read.json", params, signal);
+  async read(params: M.SalaryBookentryReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/salary/bookentry/read.json", params, signal)).data;
   }
 
   /**
@@ -4176,7 +4176,7 @@ export class SalaryCategoryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/category/delete.json
    */
-  delete_(params: M.SalaryCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.SalaryCategoryDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/category/delete.json", params, signal);
   }
 
@@ -4275,8 +4275,8 @@ export class SalaryCertificateDocumentResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/certificate/document/read.json
    */
-  read(params: M.SalaryCertificateDocumentReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/salary/certificate/document/read.json", params, signal);
+  async read(params: M.SalaryCertificateDocumentReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/salary/certificate/document/read.json", params, signal)).data;
   }
 
   /**
@@ -4331,7 +4331,7 @@ export class SalaryCertificateTemplateResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/certificate/template/delete.json
    */
-  delete_(params: M.SalaryCertificateTemplateDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.SalaryCertificateTemplateDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/certificate/template/delete.json", params, signal);
   }
 
@@ -4535,8 +4535,8 @@ export class SalaryDocumentResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/document/read.json
    */
-  read(params: M.SalaryDocumentReadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/salary/document/read.json", params, signal);
+  async read(params: M.SalaryDocumentReadParams, signal?: AbortSignal): Promise<unknown> {
+    return (await this.#http.get<{ data: unknown }>("/api/v1/salary/document/read.json", params, signal)).data;
   }
 
   /**
@@ -4635,7 +4635,7 @@ export class SalaryInsuranceTypeResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/insurance/type/delete.json
    */
-  delete_(params: M.SalaryInsuranceTypeDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.SalaryInsuranceTypeDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/insurance/type/delete.json", params, signal);
   }
 
@@ -4740,7 +4740,7 @@ export class SalaryLayoutResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/layout/delete.json
    */
-  delete_(params: M.SalaryLayoutDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.SalaryLayoutDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/layout/delete.json", params, signal);
   }
 
@@ -4866,7 +4866,7 @@ export class SalarySettingResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/setting/delete.json
    */
-  delete_(params: M.SalarySettingDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.SalarySettingDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/setting/delete.json", params, signal);
   }
 
@@ -4968,7 +4968,7 @@ export class SalaryStatementResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/statement/delete.json
    */
-  delete_(params: M.SalaryStatementDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.SalaryStatementDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/statement/delete.json", params, signal);
   }
 
@@ -5142,7 +5142,7 @@ export class SalaryStatusResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/status/delete.json
    */
-  delete_(params: M.SalaryStatusDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.SalaryStatusDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/status/delete.json", params, signal);
   }
 
@@ -5244,7 +5244,7 @@ export class SalarySumResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/sum/delete.json
    */
-  delete_(params: M.SalarySumDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.SalarySumDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/sum/delete.json", params, signal);
   }
 
@@ -5335,7 +5335,7 @@ export class SalaryTemplateResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/template/delete.json
    */
-  delete_(params: M.SalaryTemplateDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.SalaryTemplateDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/template/delete.json", params, signal);
   }
 
@@ -5447,7 +5447,7 @@ export class SalaryTypeResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/type/delete.json
    */
-  delete_(params: M.SalaryTypeDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.SalaryTypeDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/type/delete.json", params, signal);
   }
 
@@ -5626,7 +5626,7 @@ export class SequencenumberResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/sequencenumber/delete.json
    */
-  delete_(params: M.SequencenumberDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.SequencenumberDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/sequencenumber/delete.json", params, signal);
   }
 
@@ -5724,8 +5724,8 @@ export class SettingResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/setting/read.json
    */
-  read(params?: Record<string, never>, signal?: AbortSignal): Promise<M.Setting> {
-    return this.#http.get<M.Setting>("/api/v1/setting/read.json", undefined, signal);
+  async read(params?: Record<string, never>, signal?: AbortSignal): Promise<M.Setting> {
+    return (await this.#http.get<{ data: M.Setting }>("/api/v1/setting/read.json", undefined, signal)).data;
   }
 
   /**
@@ -5768,7 +5768,7 @@ export class TaxResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/tax/delete.json
    */
-  delete_(params: M.TaxDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.TaxDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/tax/delete.json", params, signal);
   }
 
@@ -5857,7 +5857,7 @@ export class TextResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/text/delete.json
    */
-  delete_(params: M.TextDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
+  delete(params: M.TextDeleteParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/text/delete.json", params, signal);
   }
 

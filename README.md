@@ -221,7 +221,8 @@ Be clear-eyed about what is and is not verified.
 | --- | --- | --- |
 | Request construction | **376/376 (100%)** | `tests/contract_test.ts`, mock transport |
 | Response shapes | 95/376 (25%) | live read-only probing, one organisation |
-| Writes executed against the API | **0/192 (0%)** | not done |
+| Full CRUD round-trips | 8 resources | `scripts/roundtrip-test.ts`, live writes |
+| Accounting writes (orders, journal) | **0%** | needs a disposable organisation |
 
 `tests/contract_test.ts` calls every generated method with every documented
 parameter and asserts the HTTP verb, the exact URL path, that each parameter
@@ -241,11 +242,31 @@ number of endpoints that flag it:
 | CSV joined with `;` | 140 |
 | One parameter silently dropped | 54 |
 
-**What none of this proves is that CashCtrl accepts the requests.** No write
-endpoint has ever been executed. The 192 POST endpoints are verified only in
-the sense that the SDK sends what the documentation describes; whether the
-server is happy with it is untested. Treat writes as unproven until you have
-run them against a throwaway organisation.
+### Live round-trips
+
+`scripts/roundtrip-test.ts` does real create -> read-back -> update ->
+`updatePreserving` -> delete cycles against a live organisation, then verifies
+nothing was left behind.
+
+It is **safe to run against a production organisation**, and deliberately
+limited to make that true. It touches only master data with no accounting
+effect, and none of it has an `nr` drawn from a sequence number. That
+restriction matters: creating an order, person, article or salary statement
+consumes the next number in its sequence, and deleting the record does **not**
+give the number back, so a test run would leave a permanent gap in
+audit-relevant invoice numbering. Journal entries are excluded separately as
+real, VAT-relevant postings.
+
+```sh
+deno task roundtrip     # 8 resources, 48 assertions, cleans up after itself
+```
+
+Covering orders, journal entries and the rest of the accounting tier means
+pointing this at a **disposable trial organisation**, not your books.
+
+**What still is not proven:** no order, journal entry, person or article has
+ever been created through this SDK against a real server. Those paths are
+typechecked and contract-tested, but never executed. Treat them as unproven.
 
 ## Caveats
 

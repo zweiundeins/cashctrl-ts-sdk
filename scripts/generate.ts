@@ -324,7 +324,26 @@ const declaredParams = new Set<string>();
 const resourceDecls: string[] = [];
 const collisions: string[] = [];
 
-/** Return type for one endpoint, based on what probing found. */
+/**
+ * Endpoints whose payload CashCtrl wraps in `{ data: ... }` by convention:
+ * `list` and `tree` return an array, `read` a single object.
+ *
+ * This is decided by the verb, NOT by what probing observed. Probing only ever
+ * ran against one organisation, and where it failed or was skipped (20 of
+ * these endpoints) the generated method used to hand back the raw envelope
+ * instead of unwrapping it. That made `file.category.read()` behave unlike
+ * `tax.read()` for no reason a caller could see. Probe evidence refines the
+ * element *type*; it does not decide the *shape*.
+ */
+function envelopeKind(endpoint: Endpoint): "array" | "object" | null {
+  if (endpoint.method !== "GET") return null;
+  const verb = splitPath(endpoint.path).verb;
+  if (verb === "list.json" || verb === "tree.json") return "array";
+  if (verb === "read.json") return "object";
+  return null;
+}
+
+/** Return type for one endpoint, based on the API's conventions and probing. */
 function returnType(endpoint: Endpoint, entity: string | undefined): string {
   const verb = splitPath(endpoint.path).verb;
   const probe = probed.responses[endpoint.path];
@@ -333,6 +352,24 @@ function returnType(endpoint: Endpoint, entity: string | undefined): string {
   if (/\.(pdf|xlsx|zip|csv|vcf|xml|html)$/.test(verb)) return "Response";
 
   if (endpoint.method === "POST") return "WriteEnvelope";
+
+  // Conventional shapes win, so an unprobed `list` is still `T[]`.
+  const envelope = envelopeKind(endpoint);
+  if (envelope === "array") {
+    if (probe && !probe.error && probe.shape.kind === "array") {
+      const items = probe.shape.items;
+      if (items.kind === "object" && entity) return `${entity}[]`;
+      return `${shapeTsType(items, entityNameFor(endpoint))}[]`;
+    }
+    return entity ? `${entity}[]` : "unknown[]";
+  }
+  if (envelope === "object") {
+    if (entity) return entity;
+    if (probe && !probe.error && probe.shape.kind === "object") {
+      return shapeTsType(probe.shape, entityNameFor(endpoint));
+    }
+    return "unknown";
+  }
 
   if (probe && !probe.error) {
     if (probe.shape.kind === "array") {
@@ -516,15 +553,22 @@ function callBody(endpoint: Endpoint, ret: string, hasParams: boolean): string {
   if (ret === "Response") {
     return `    return this.#http.raw(${method}, ${path}, ${args}, signal);`;
   }
+
+  // Conventional envelopes first, so an unprobed `read` still unwraps `data`.
+  const envelope = envelopeKind(endpoint);
+  if (envelope === "array") {
+    return `    return this.#http.list<${
+      ret.replace(/\[\]$/, "")
+    }>(${path}, ${args}, signal);`;
+  }
+  if (envelope === "object") {
+    return `    return (await this.#http.get<{ data: ${ret} }>(${path}, ${args}, signal)).data;`;
+  }
+
+  // Anything else (balance, result, exchangerate, ...) follows the evidence.
   const probe = probed.responses[endpoint.path];
-  if (endpoint.method === "GET" && probe?.envelope === "data") {
-    if (probe.shape.kind === "array") {
-      return `    return this.#http.list<${
-        ret.replace(/\[\]$/, "")
-      }>(${path}, ${args}, signal);`;
-    }
-    const envelope = `{ data: ${ret} }`;
-    return `    return (await this.#http.get<${envelope}>(${path}, ${args}, signal)).data;`;
+  if (endpoint.method === "GET" && probe?.envelope === "data" && !probe.error) {
+    return `    return (await this.#http.get<{ data: ${ret} }>(${path}, ${args}, signal)).data;`;
   }
   return `    return this.#http.${
     endpoint.method === "GET" ? "get" : "post"

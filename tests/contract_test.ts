@@ -117,6 +117,37 @@ function resolveMethod(
   return { fn: fn.bind(node), label: `${trail.join(".")}.${name}` };
 }
 
+Deno.test("standard CRUD verbs get their idiomatic method names", () => {
+  // Deliberately hardcoded, NOT derived from methodName(). The endpoint-walk
+  // test below resolves methods with that same function, so it happily passed
+  // while every delete endpoint was generated as `delete_` -- a bug only found
+  // when a live round-trip called `.delete()` and silently deleted nothing.
+  // Asserting the expected names by hand is what makes this independent.
+  const expected: Record<string, string> = {
+    "/api/v1/tax/list.json": "list",
+    "/api/v1/tax/read.json": "read",
+    "/api/v1/tax/create.json": "create",
+    "/api/v1/tax/update.json": "update",
+    "/api/v1/tax/delete.json": "delete",
+    "/api/v1/account/category/tree.json": "tree",
+    "/api/v1/account/list.csv": "listCsv",
+    "/api/v1/account/update_attachments.json": "updateAttachments",
+  };
+
+  const client = new CashCtrl({ organisation: "o", apiKey: "k" });
+  for (const [path, name] of Object.entries(expected)) {
+    const { resource } = splitPath(path);
+    // deno-lint-ignore no-explicit-any
+    let node: any = client;
+    for (const segment of resource) node = node?.[propertyName(segment)];
+    assertEquals(
+      typeof node?.[name],
+      "function",
+      `${path} should be callable as .${name}()`,
+    );
+  }
+});
+
 Deno.test("every documented endpoint is reachable and issues the right request", async (t) => {
   const failures: string[] = [];
   let checked = 0;

@@ -1,44 +1,20 @@
 /** Shared naming rules for the generator. */
 
-const RESERVED = new Set([
-  "break",
-  "case",
-  "catch",
-  "class",
-  "const",
-  "continue",
-  "debugger",
-  "default",
-  "delete",
-  "do",
-  "else",
-  "enum",
-  "export",
-  "extends",
-  "false",
-  "finally",
-  "for",
-  "function",
-  "if",
-  "import",
-  "in",
-  "instanceof",
-  "new",
-  "null",
-  "return",
-  "super",
-  "switch",
-  "this",
-  "throw",
-  "true",
-  "try",
-  "typeof",
-  "var",
-  "void",
-  "while",
-  "with",
-  "yield",
-]);
+/**
+ * Names that genuinely cannot be used as a class member.
+ *
+ * Deliberately NOT the JavaScript keyword list. Keywords are reserved for
+ * *identifiers*, not for property or method names: `delete(...)`, `new(...)`
+ * and `for(...)` are all legal class members. Escaping them produced
+ * `client.tax.delete_(...)` for every one of the 33 delete endpoints, which is
+ * not the method any caller reaches for. A round-trip test against a live
+ * organisation called `.delete(...)`, silently did nothing, and left records
+ * behind.
+ *
+ * Only these would actually break: `constructor` would replace the class
+ * constructor, and the other two corrupt the prototype chain.
+ */
+const RESERVED = new Set(["constructor", "prototype", "__proto__"]);
 
 /** File-extension suffixes that distinguish sibling endpoints. */
 const FORMATS = ["json", "csv", "pdf", "xlsx", "zip", "vcf", "xml", "html"];
