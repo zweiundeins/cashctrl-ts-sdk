@@ -30,6 +30,7 @@ import {
   splitPath,
   typeName,
 } from "./naming.ts";
+import { findOverride } from "./overrides.ts";
 
 const root = (p: string) => new URL(`../${p}`, import.meta.url);
 
@@ -43,8 +44,18 @@ try {
 
 /* ------------------------------------------------------- request params -- */
 
-/** Maps a documented param type to the TypeScript type the client accepts. */
-function paramTsType(p: Param): string {
+/**
+ * Maps a documented param type to the TypeScript type the client accepts.
+ *
+ * `endpointPath` and `paramPath` are threaded through so `overrides.ts` can
+ * correct the handful of params CashCtrl documents incorrectly.
+ */
+function paramTsType(p: Param, endpointPath = "", paramPath = ""): string {
+  const override = endpointPath && paramPath
+    ? findOverride(endpointPath, paramPath)
+    : undefined;
+  if (override) return override.tsType;
+
   switch (p.type) {
     case "NUMBER":
       return "number";
@@ -58,7 +69,9 @@ function paramTsType(p: Param): string {
       if (p.fields?.length) {
         const inline = p.fields.map((f) => {
           const optional = f.required ? "" : "?";
-          return `    ${key(f.name)}${optional}: ${paramTsType(f)};`;
+          return `    ${key(f.name)}${optional}: ${
+            paramTsType(f, endpointPath, `${paramPath}.${f.name}`)
+          };`;
         }).join("\n");
         const object = `{\n${inline}\n  }`;
         return p.isArray ? `readonly (${object})[]` : object;
@@ -88,13 +101,19 @@ function paramDoc(p: Param): string[] {
   return notes;
 }
 
-function paramsInterface(name: string, params: Param[]): string {
+function paramsInterface(
+  name: string,
+  params: Param[],
+  endpointPath: string,
+): string {
   const body = params.map((p) => {
     const doc = jsdoc(paramDoc(p), "  ");
     const optional = p.required ? "" : "?";
     // `null` explicitly clears a field on update endpoints.
     const nullable = p.required ? "" : " | null";
-    return `${doc}  ${key(p.name)}${optional}: ${paramTsType(p)}${nullable};`;
+    return `${doc}  ${key(p.name)}${optional}: ${
+      paramTsType(p, endpointPath, p.name)
+    }${nullable};`;
   }).join("\n");
   // A type alias, not an interface: only anonymous object types get an
   // implicit index signature, which is what makes them assignable to the
@@ -200,31 +219,53 @@ function docScalar(p: Param): "string" | "number" | "boolean" | undefined {
  * Probing can only observe the data one organisation happens to have, so an
  * always-empty column like `taxId` infers as bare `null`. The docs know it is
  * a NUMBER, so the honest type is `number | null`.
+ *
+ * Recurses into nested objects and arrays, because JSON params document their
+ * inner shape too: without this, `order.items[].articleNr` and
+ * `tax.rates[].dateValid` stay `unknown` and are unusable at a call site.
  */
-function widenNullFields(shape: Shape, endpoints: Endpoint[]): Shape {
-  if (shape.kind !== "object") return shape;
-
-  const documented = new Map<string, Param>();
-  for (const endpoint of endpoints) {
-    if (!/\/(create|update)\.json$/.test(endpoint.path)) continue;
-    for (const param of endpoint.params) {
-      if (!documented.has(param.name)) documented.set(param.name, param);
-    }
+function widenNullFields(shape: Shape, documented: Map<string, Param>): Shape {
+  if (shape.kind === "array") {
+    return { kind: "array", items: widenNullFields(shape.items, documented) };
   }
+  if (shape.kind !== "object") return shape;
 
   const fields: Record<string, { shape: Shape; optional: boolean }> = {};
   for (const [name, field] of Object.entries(shape.fields)) {
+    const param = documented.get(name);
     let next = field.shape;
+
     if (
       next.kind === "scalar" && next.types.length === 1 &&
       next.types[0] === "null"
     ) {
-      const scalar = docScalar(documented.get(name) ?? ({} as Param));
+      const scalar = docScalar(param ?? ({} as Param));
       if (scalar) next = { kind: "scalar", types: [scalar, "null"] };
+    } else if (next.kind === "object" || next.kind === "array") {
+      next = widenNullFields(next, paramIndex(param?.fields ?? []));
     }
+
     fields[name] = { shape: next, optional: field.optional };
   }
   return { kind: "object", fields };
+}
+
+/** Indexes documented params by name, keeping the first definition seen. */
+function paramIndex(params: Param[]): Map<string, Param> {
+  const index = new Map<string, Param>();
+  for (const param of params) {
+    if (!index.has(param.name)) index.set(param.name, param);
+  }
+  return index;
+}
+
+/** Documented create/update params for a resource, indexed by name. */
+function writableParams(endpoints: Endpoint[]): Map<string, Param> {
+  return paramIndex(
+    endpoints
+      .filter((e) => /\/(create|update)\.json$/.test(e.path))
+      .flatMap((e) => e.params),
+  );
 }
 
 function mergeForEntity(a: Shape, b: Shape): Shape {
@@ -278,6 +319,7 @@ for (const endpoint of spec.endpoints) {
 /* -------------------------------------------------------------- emit TS -- */
 
 const paramDecls: string[] = [];
+const updateFieldDecls: string[] = [];
 const declaredParams = new Set<string>();
 const resourceDecls: string[] = [];
 const collisions: string[] = [];
@@ -327,7 +369,10 @@ function emitNode(node: Node): string | undefined {
   const shape = entityShape(node.segments);
   let entity: string | undefined;
   if (shape) {
-    shapeTsType(widenNullFields(shape, node.endpoints), entityName);
+    shapeTsType(
+      widenNullFields(shape, writableParams(node.endpoints)),
+      entityName,
+    );
     entity = entityName;
   }
 
@@ -363,7 +408,9 @@ function emitNode(node: Node): string | undefined {
     const allOptional = endpoint.params.every((p) => !p.required);
     if (hasParams && !declaredParams.has(paramsName)) {
       declaredParams.add(paramsName);
-      paramDecls.push(paramsInterface(paramsName, endpoint.params));
+      paramDecls.push(
+        paramsInterface(paramsName, endpoint.params, endpoint.path),
+      );
     }
 
     const ret = qualify(returnType(endpoint, entity));
@@ -384,6 +431,57 @@ function emitNode(node: Node): string | undefined {
     members.push(
       `${doc}  ${isAsync ? "async " : ""}${name}(${signature}): ` +
         `Promise<${ret}> {\n${body}\n  }`,
+    );
+  }
+
+  // CashCtrl update endpoints replace the whole record, so a caller who omits
+  // a field silently clears it. Emit a read-modify-write helper alongside the
+  // raw `update` for every resource that has one.
+  // Requires documented params: without them there is no params type to merge
+  // into, and nothing to preserve. `setting/update.json` is the one such case.
+  const updateEndpoint = node.endpoints.find((e) =>
+    e.path.endsWith("/update.json") && e.params.length > 0
+  );
+  if (updateEndpoint && entity) {
+    const updateParamsName = `${typeName(node.segments)}UpdateParams`;
+    const writable = updateEndpoint.params.map((p) => p.name);
+    const fieldsConst = `${
+      typeName(node.segments).toUpperCase()
+    }_UPDATE_FIELDS`;
+    updateFieldDecls.push(
+      `/** Writable parameters of \`${updateEndpoint.path}\`. */\n` +
+        `export const ${fieldsConst}: readonly string[] = ${
+          JSON.stringify(writable)
+        };\n`,
+    );
+
+    members.push(
+      jsdoc([
+        `Updates while preserving fields you do not pass.`,
+        "",
+        `\`${updateEndpoint.path}\` replaces the entire record: any writable ` +
+        `parameter left out is treated as empty and cleared. This reads the ` +
+        `current values from \`existing\` and applies \`changes\` on top, so ` +
+        `only what you name actually changes.`,
+        "",
+        "```ts",
+        `const current = await client.${
+          node.segments.map(propertyName).join(".")
+        }.read({ id });`,
+        `await client.${node.segments.map(propertyName).join(".")}` +
+        `.updatePreserving(current, { id, description: "New" });`,
+        "```",
+      ], "  ") +
+        `  updatePreserving(\n` +
+        `    existing: Readonly<Record<string, unknown>>,\n` +
+        `    changes: Partial<M.${updateParamsName}>,\n` +
+        `    signal?: AbortSignal,\n` +
+        `  ): Promise<WriteEnvelope> {\n` +
+        `    return this.update(\n` +
+        `      mergeUpdate<M.${updateParamsName}>(existing, changes, ${fieldsConst}),\n` +
+        `      signal,\n` +
+        `    );\n` +
+        `  }`,
     );
   }
 
@@ -457,7 +555,9 @@ await Deno.writeTextFile(
   root("src/generated/resources.ts"),
   header("Typed resource classes, one per path segment.") +
     `import type { CashCtrlHttp, WriteEnvelope } from "../http.ts";\n` +
+    `import { mergeUpdate } from "../merge.ts";\n` +
     `import type * as M from "./models.ts";\n\n` +
+    updateFieldDecls.join("") + "\n" +
     resourcesSource,
 );
 

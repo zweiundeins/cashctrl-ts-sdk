@@ -3,7 +3,73 @@
 // Typed resource classes, one per path segment.
 
 import type { CashCtrlHttp, WriteEnvelope } from "../http.ts";
+import { mergeUpdate } from "../merge.ts";
 import type * as M from "./models.ts";
+
+/** Writable parameters of `/api/v1/account/bank/update.json`. */
+export const ACCOUNTBANK_UPDATE_FIELDS: readonly string[] = ["bic","iban","id","name","type","accountId","attachments","currencyId","isInactive","notes","qrFirstDigits","qrIban","url"];
+/** Writable parameters of `/api/v1/account/category/update.json`. */
+export const ACCOUNTCATEGORY_UPDATE_FIELDS: readonly string[] = ["id","name","number","parentId"];
+/** Writable parameters of `/api/v1/account/update.json`. */
+export const ACCOUNT_UPDATE_FIELDS: readonly string[] = ["categoryId","id","name","number","allocations","attachments","currencyId","custom","isInactive","notes","targetMax","targetMin","taxId"];
+/** Writable parameters of `/api/v1/currency/update.json`. */
+export const CURRENCY_UPDATE_FIELDS: readonly string[] = ["code","id","description","isDefault","rate"];
+/** Writable parameters of `/api/v1/file/update.json`. */
+export const FILE_UPDATE_FIELDS: readonly string[] = ["id","name","categoryId","custom","description","notes","replaceWith"];
+/** Writable parameters of `/api/v1/fiscalperiod/update.json`. */
+export const FISCALPERIOD_UPDATE_FIELDS: readonly string[] = ["id","end","isCustom","name","salaryEnd","salaryStart","start","type"];
+/** Writable parameters of `/api/v1/inventory/article/category/update.json`. */
+export const INVENTORYARTICLECATEGORY_UPDATE_FIELDS: readonly string[] = ["id","name","allocations","parentId","purchaseAccountId","salesAccountId","sequenceNrId"];
+/** Writable parameters of `/api/v1/inventory/article/update.json`. */
+export const INVENTORYARTICLE_UPDATE_FIELDS: readonly string[] = ["id","name","attachments","binLocation","categoryId","currencyId","custom","description","isInactive","isPurchasePriceGross","isSalesPriceGross","isStockArticle","lastPurchasePrice","locationId","maxStock","minStock","notes","nr","salesPrice","sequenceNumberId","stock","unitId"];
+/** Writable parameters of `/api/v1/inventory/unit/update.json`. */
+export const INVENTORYUNIT_UPDATE_FIELDS: readonly string[] = ["id","name"];
+/** Writable parameters of `/api/v1/journal/update.json`. */
+export const JOURNAL_UPDATE_FIELDS: readonly string[] = ["amount","creditId","debitId","id","allocations","associateId","attachments","currencyId","currencyRate","custom","dateAdded","daysBefore","endDate","items","notes","notifyEmail","notifyPersonId","notifyType","notifyUserId","recurrence","reference","sequenceNumberId","startDate","taxId","title"];
+/** Writable parameters of `/api/v1/location/update.json`. */
+export const LOCATION_UPDATE_FIELDS: readonly string[] = ["id","name","address","bankAccountId","burNr","canton","city","country","email","footer","isInactive","logoFileId","orgName","phoneMain","phoneSalaryCert","type","url","vatUid","zip"];
+/** Writable parameters of `/api/v1/order/category/update.json`. */
+export const ORDERCATEGORY_UPDATE_FIELDS: readonly string[] = ["accountId","id","namePlural","nameSingular","status","addressType","bookTemplates","bookType","currencyId","dueDays","fileId","footerTemplateId","hasDueDays","headerTemplateId","isDisplayItemGross","isDisplayPrices","isInactive","isSwitchRecipient","layoutId","mailSubject","mailTemplateId","message","responsiblePersonId","roundingId","sentStatusId","sequenceNrId","type"];
+/** Writable parameters of `/api/v1/order/layout/update.json`. */
+export const ORDERLAYOUT_UPDATE_FIELDS: readonly string[] = ["id","name","elements","footer","isCountryEnglish","isCountryUppercase","isDisplayDocumentName","isDisplayItemArticleNr","isDisplayItemPriceRounded","isDisplayItemTax","isDisplayItemUnit","isDisplayLogo","isDisplayOrgAddressInWindow","isDisplayPageNr","isDisplayPayments","isDisplayPosNr","isDisplayRecipientNr","isDisplayResponsiblePerson","isDisplayZeroTax","isInactive","isOmitSameCountry","isQrEmptyAmount","isQrNoLines","isQrNoReferenceNr","letterPaperFileId","logoHeight","pageSize","parentId"];
+/** Writable parameters of `/api/v1/order/update.json`. */
+export const ORDER_UPDATE_FIELDS: readonly string[] = ["associateId","categoryId","date","id","accountId","attachments","currencyId","currencyRate","custom","daysBefore","description","discountPercentage","dueDays","endDate","groupId","isDisplayItemGross","items","language","notes","notifyEmail","notifyPersonId","notifyType","notifyUserId","nr","previousId","recurrence","responsiblePersonId","roundingId","sequenceNumberId","startDate","statusId"];
+/** Writable parameters of `/api/v1/person/category/update.json`. */
+export const PERSONCATEGORY_UPDATE_FIELDS: readonly string[] = ["id","name","discountPercentage","parentId","sequenceNrId"];
+/** Writable parameters of `/api/v1/person/title/update.json`. */
+export const PERSONTITLE_UPDATE_FIELDS: readonly string[] = ["id","name","gender","sentence"];
+/** Writable parameters of `/api/v1/person/update.json`. */
+export const PERSON_UPDATE_FIELDS: readonly string[] = ["company","firstName","id","lastName","addresses","altName","attachments","bankAccounts","bankData","categoryId","certificateTemplateId","certificateValues","children","color","contacts","custom","dateBirth","department","discountPercentage","industry","insuranceContracts","insuranceMemberNr","insuranceNr","isAutoFillResponsiblePerson","isCustomer","isEmployee","isFamily","isInactive","isInsurance","isVendor","language","locationId","notes","nr","position","sequenceNumberId","servicePeriods","ssn","superiorId","titleId","userId","vatUid"];
+/** Writable parameters of `/api/v1/rounding/update.json`. */
+export const ROUNDING_UPDATE_FIELDS: readonly string[] = ["accountId","id","name","rounding","mode"];
+/** Writable parameters of `/api/v1/salary/category/update.json`. */
+export const SALARYCATEGORY_UPDATE_FIELDS: readonly string[] = ["id","name","number","parentId"];
+/** Writable parameters of `/api/v1/salary/certificate/template/update.json`. */
+export const SALARYCERTIFICATETEMPLATE_UPDATE_FIELDS: readonly string[] = ["id","name","elements","fileId","isDefault","isInactive","mailSubject","mailTemplateId","orgLocationId","parentId"];
+/** Writable parameters of `/api/v1/salary/certificate/update.json`. */
+export const SALARYCERTIFICATE_UPDATE_FIELDS: readonly string[] = ["id","notes","valuesLocal"];
+/** Writable parameters of `/api/v1/salary/insurance/type/update.json`. */
+export const SALARYINSURANCETYPE_UPDATE_FIELDS: readonly string[] = ["id","name","codes","description"];
+/** Writable parameters of `/api/v1/salary/layout/update.json`. */
+export const SALARYLAYOUT_UPDATE_FIELDS: readonly string[] = ["id","name","elements","footer","isCountryEnglish","isCountryUppercase","isDisplayBase","isDisplayDocumentName","isDisplayDocumentNr","isDisplayEmployeeNr","isDisplayLogo","isDisplayNr","isDisplayOrgAddressInWindow","isDisplayPaymentDate","isDisplayQuantity","isDisplayRate","isDisplaySsn","isInactive","isOmitSameCountry","letterPaperFileId","logoHeight","pageSize","parentId"];
+/** Writable parameters of `/api/v1/salary/setting/update.json`. */
+export const SALARYSETTING_UPDATE_FIELDS: readonly string[] = ["id","name","variableName","boolValue","decimalValue","isPercentage","textValue","type"];
+/** Writable parameters of `/api/v1/salary/statement/update.json`. */
+export const SALARYSTATEMENT_UPDATE_FIELDS: readonly string[] = ["date","datePayment","id","personId","statusId","templateId","attachments","currencyId","currencyRate","custom","daysBefore","endDate","insurances","message","notes","notifyEmail","notifyPersonId","notifyType","notifyUserId","nr","recalculate","recurrence","sequenceNumberId","startDate","types","valuesLocal"];
+/** Writable parameters of `/api/v1/salary/status/update.json`. */
+export const SALARYSTATUS_UPDATE_FIELDS: readonly string[] = ["icon","id","name","actionId","isBook","isClosed"];
+/** Writable parameters of `/api/v1/salary/sum/update.json`. */
+export const SALARYSUM_UPDATE_FIELDS: readonly string[] = ["id","name","variableName","isDisplayColumn","number"];
+/** Writable parameters of `/api/v1/salary/template/update.json`. */
+export const SALARYTEMPLATE_UPDATE_FIELDS: readonly string[] = ["id","name","currencyId","dayOfMonth","footerTemplateId","headerTemplateId","insurances","isDefault","isInactive","layoutId","mailSubject","mailTemplateId","message","orgLocationId","parentId","paymentDayOfMonth","sequenceNrId","types","valuesLocal"];
+/** Writable parameters of `/api/v1/salary/type/update.json`. */
+export const SALARYTYPE_UPDATE_FIELDS: readonly string[] = ["categoryId","id","name","number","type","allocations","base","calculation","certificateCode","creditId","debitId","description","fields","insuranceTypeId","isInactive","isSchedulable","isVisible","notes","preCalculations","quantity","rate","rowName","sums","variableName"];
+/** Writable parameters of `/api/v1/sequencenumber/update.json`. */
+export const SEQUENCENUMBER_UPDATE_FIELDS: readonly string[] = ["id","name","pattern","currentDailyNumber","currentInfiniteNumber","currentMonthlyNumber","currentYearlyNumber","dailyNumberDigits","dayDigits","infiniteNumberDigits","isSkipExisting","monthDigits","monthlyNumberDigits","yearDigits","yearlyNumberDigits"];
+/** Writable parameters of `/api/v1/tax/update.json`. */
+export const TAX_UPDATE_FIELDS: readonly string[] = ["code","components","id","rates","description","documentName","isDisplayTaxRate","isInactive"];
+/** Writable parameters of `/api/v1/text/update.json`. */
+export const TEXT_UPDATE_FIELDS: readonly string[] = ["id","name","type","isDefault","value"];
 
 /** Endpoints under `/api/v1/account/bank`. */
 export class AccountBankResource {
@@ -118,6 +184,29 @@ export class AccountBankResource {
   update(params: M.AccountBankUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/account/bank/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/account/bank/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.account.bank.read({ id });
+   * await client.account.bank.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.AccountBankUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.AccountBankUpdateParams>(existing, changes, ACCOUNTBANK_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/account/category`. */
@@ -195,6 +284,29 @@ export class AccountCategoryResource {
    */
   update(params: M.AccountCategoryUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/account/category/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/account/category/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.account.category.read({ id });
+   * await client.account.category.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.AccountCategoryUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.AccountCategoryUpdateParams>(existing, changes, ACCOUNTCATEGORY_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -562,6 +674,29 @@ export class AccountResource {
   update(params: M.AccountUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/account/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/account/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.account.read({ id });
+   * await client.account.updatePreserving(current, { id, description: "New"
+   * });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.AccountUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.AccountUpdateParams>(existing, changes, ACCOUNT_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/currency`. */
@@ -640,6 +775,29 @@ export class CurrencyResource {
    */
   update(params: M.CurrencyUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/currency/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/currency/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.currency.read({ id });
+   * await client.currency.updatePreserving(current, { id, description: "New"
+   * });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.CurrencyUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.CurrencyUpdateParams>(existing, changes, CURRENCY_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -1110,6 +1268,28 @@ export class FileResource {
   update(params: M.FileUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/file/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/file/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.file.read({ id });
+   * await client.file.updatePreserving(current, { id, description: "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.FileUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.FileUpdateParams>(existing, changes, FILE_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/fiscalperiod/task`. */
@@ -1350,6 +1530,29 @@ export class FiscalperiodResource {
   update(params: M.FiscalperiodUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/fiscalperiod/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/fiscalperiod/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.fiscalperiod.read({ id });
+   * await client.fiscalperiod.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.FiscalperiodUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.FiscalperiodUpdateParams>(existing, changes, FISCALPERIOD_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/history`. */
@@ -1447,6 +1650,29 @@ export class InventoryArticleCategoryResource {
    */
   update(params: M.InventoryArticleCategoryUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/inventory/article/category/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/inventory/article/category/update.json` replaces the entire
+   * record: any writable parameter left out is treated as empty and cleared.
+   * This reads the current values from `existing` and applies `changes` on
+   * top, so only what you name actually changes.
+   * ```ts
+   * const current = await client.inventory.article.category.read({ id });
+   * await client.inventory.article.category.updatePreserving(current, { id,
+   * description: "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.InventoryArticleCategoryUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.InventoryArticleCategoryUpdateParams>(existing, changes, INVENTORYARTICLECATEGORY_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -1646,6 +1872,29 @@ export class InventoryArticleResource {
    */
   update(params: M.InventoryArticleUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/inventory/article/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/inventory/article/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.inventory.article.read({ id });
+   * await client.inventory.article.updatePreserving(current, { id,
+   * description: "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.InventoryArticleUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.InventoryArticleUpdateParams>(existing, changes, INVENTORYARTICLE_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -1927,6 +2176,29 @@ export class InventoryUnitResource {
    */
   update(params: M.InventoryUnitUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/inventory/unit/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/inventory/unit/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.inventory.unit.read({ id });
+   * await client.inventory.unit.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.InventoryUnitUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.InventoryUnitUpdateParams>(existing, changes, INVENTORYUNIT_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -2271,6 +2543,29 @@ export class JournalResource {
   update(params: M.JournalUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/journal/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/journal/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.journal.read({ id });
+   * await client.journal.updatePreserving(current, { id, description: "New"
+   * });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.JournalUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.JournalUpdateParams>(existing, changes, JOURNAL_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/location`. */
@@ -2337,6 +2632,29 @@ export class LocationResource {
    */
   update(params: M.LocationUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/location/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/location/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.location.read({ id });
+   * await client.location.updatePreserving(current, { id, description: "New"
+   * });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.LocationUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.LocationUpdateParams>(existing, changes, LOCATION_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -2499,6 +2817,29 @@ export class OrderCategoryResource {
   update(params: M.OrderCategoryUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/order/category/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/order/category/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.order.category.read({ id });
+   * await client.order.category.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.OrderCategoryUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.OrderCategoryUpdateParams>(existing, changes, ORDERCATEGORY_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/order/document`. */
@@ -2632,6 +2973,29 @@ export class OrderLayoutResource {
    */
   update(params: M.OrderLayoutUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/order/layout/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/order/layout/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.order.layout.read({ id });
+   * await client.order.layout.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.OrderLayoutUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.OrderLayoutUpdateParams>(existing, changes, ORDERLAYOUT_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -2866,6 +3230,28 @@ export class OrderResource {
   update(params: M.OrderUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/order/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/order/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.order.read({ id });
+   * await client.order.updatePreserving(current, { id, description: "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.OrderUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.OrderUpdateParams>(existing, changes, ORDER_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/person/category`. */
@@ -2943,6 +3329,29 @@ export class PersonCategoryResource {
    */
   update(params: M.PersonCategoryUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/person/category/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/person/category/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.person.category.read({ id });
+   * await client.person.category.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.PersonCategoryUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.PersonCategoryUpdateParams>(existing, changes, PERSONCATEGORY_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -3077,6 +3486,29 @@ export class PersonTitleResource {
    */
   update(params: M.PersonTitleUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/person/title/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/person/title/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.person.title.read({ id });
+   * await client.person.title.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.PersonTitleUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.PersonTitleUpdateParams>(existing, changes, PERSONTITLE_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -3222,6 +3654,28 @@ export class PersonResource {
    */
   update(params: M.PersonUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/person/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/person/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.person.read({ id });
+   * await client.person.updatePreserving(current, { id, description: "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.PersonUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.PersonUpdateParams>(existing, changes, PERSON_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -3599,6 +4053,29 @@ export class RoundingResource {
   update(params: M.RoundingUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/rounding/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/rounding/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.rounding.read({ id });
+   * await client.rounding.updatePreserving(current, { id, description: "New"
+   * });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.RoundingUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.RoundingUpdateParams>(existing, changes, ROUNDING_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/salary/bookentry`. */
@@ -3747,6 +4224,29 @@ export class SalaryCategoryResource {
   update(params: M.SalaryCategoryUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/category/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/salary/category/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.salary.category.read({ id });
+   * await client.salary.category.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.SalaryCategoryUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.SalaryCategoryUpdateParams>(existing, changes, SALARYCATEGORY_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/salary/certificate/document`. */
@@ -3878,6 +4378,29 @@ export class SalaryCertificateTemplateResource {
   update(params: M.SalaryCertificateTemplateUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/certificate/template/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/salary/certificate/template/update.json` replaces the entire
+   * record: any writable parameter left out is treated as empty and cleared.
+   * This reads the current values from `existing` and applies `changes` on
+   * top, so only what you name actually changes.
+   * ```ts
+   * const current = await client.salary.certificate.template.read({ id });
+   * await client.salary.certificate.template.updatePreserving(current, { id,
+   * description: "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.SalaryCertificateTemplateUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.SalaryCertificateTemplateUpdateParams>(existing, changes, SALARYCERTIFICATETEMPLATE_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/salary/certificate`. */
@@ -3960,6 +4483,29 @@ export class SalaryCertificateResource {
    */
   update(params: M.SalaryCertificateUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/certificate/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/salary/certificate/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.salary.certificate.read({ id });
+   * await client.salary.certificate.updatePreserving(current, { id,
+   * description: "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.SalaryCertificateUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.SalaryCertificateUpdateParams>(existing, changes, SALARYCERTIFICATE_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -4126,6 +4672,29 @@ export class SalaryInsuranceTypeResource {
   update(params: M.SalaryInsuranceTypeUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/insurance/type/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/salary/insurance/type/update.json` replaces the entire record:
+   * any writable parameter left out is treated as empty and cleared. This
+   * reads the current values from `existing` and applies `changes` on top, so
+   * only what you name actually changes.
+   * ```ts
+   * const current = await client.salary.insurance.type.read({ id });
+   * await client.salary.insurance.type.updatePreserving(current, { id,
+   * description: "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.SalaryInsuranceTypeUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.SalaryInsuranceTypeUpdateParams>(existing, changes, SALARYINSURANCETYPE_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/salary/insurance`. */
@@ -4207,6 +4776,29 @@ export class SalaryLayoutResource {
    */
   update(params: M.SalaryLayoutUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/layout/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/salary/layout/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.salary.layout.read({ id });
+   * await client.salary.layout.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.SalaryLayoutUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.SalaryLayoutUpdateParams>(existing, changes, SALARYLAYOUT_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -4310,6 +4902,29 @@ export class SalarySettingResource {
    */
   update(params: M.SalarySettingUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/setting/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/salary/setting/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.salary.setting.read({ id });
+   * await client.salary.setting.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.SalarySettingUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.SalarySettingUpdateParams>(existing, changes, SALARYSETTING_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -4474,6 +5089,29 @@ export class SalaryStatementResource {
   update(params: M.SalaryStatementUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/statement/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/salary/statement/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.salary.statement.read({ id });
+   * await client.salary.statement.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.SalaryStatementUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.SalaryStatementUpdateParams>(existing, changes, SALARYSTATEMENT_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/salary/status`. */
@@ -4553,6 +5191,29 @@ export class SalaryStatusResource {
   update(params: M.SalaryStatusUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/status/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/salary/status/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.salary.status.read({ id });
+   * await client.salary.status.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.SalaryStatusUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.SalaryStatusUpdateParams>(existing, changes, SALARYSTATUS_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/salary/sum`. */
@@ -4619,6 +5280,29 @@ export class SalarySumResource {
    */
   update(params: M.SalarySumUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/sum/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/salary/sum/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.salary.sum.read({ id });
+   * await client.salary.sum.updatePreserving(current, { id, description: "New"
+   * });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.SalarySumUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.SalarySumUpdateParams>(existing, changes, SALARYSUM_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -4697,6 +5381,29 @@ export class SalaryTemplateResource {
    */
   update(params: M.SalaryTemplateUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/template/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/salary/template/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.salary.template.read({ id });
+   * await client.salary.template.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.SalaryTemplateUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.SalaryTemplateUpdateParams>(existing, changes, SALARYTEMPLATE_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -4810,6 +5517,29 @@ export class SalaryTypeResource {
    */
   update(params: M.SalaryTypeUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/salary/type/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/salary/type/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.salary.type.read({ id });
+   * await client.salary.type.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.SalaryTypeUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.SalaryTypeUpdateParams>(existing, changes, SALARYTYPE_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -4945,6 +5675,29 @@ export class SequencenumberResource {
   update(params: M.SequencenumberUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/sequencenumber/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/sequencenumber/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.sequencenumber.read({ id });
+   * await client.sequencenumber.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.SequencenumberUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.SequencenumberUpdateParams>(existing, changes, SEQUENCENUMBER_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/setting`. */
@@ -5052,6 +5805,28 @@ export class TaxResource {
   update(params: M.TaxUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/tax/update.json", params, signal);
   }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/tax/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.tax.read({ id });
+   * await client.tax.updatePreserving(current, { id, description: "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.TaxUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.TaxUpdateParams>(existing, changes, TAX_UPDATE_FIELDS),
+      signal,
+    );
+  }
 }
 
 /** Endpoints under `/api/v1/text`. */
@@ -5119,5 +5894,27 @@ export class TextResource {
    */
   update(params: M.TextUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/text/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/text/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.text.read({ id });
+   * await client.text.updatePreserving(current, { id, description: "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.TextUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.TextUpdateParams>(existing, changes, TEXT_UPDATE_FIELDS),
+      signal,
+    );
   }
 }

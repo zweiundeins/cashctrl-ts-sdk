@@ -34,5 +34,6 @@ export {
   CashCtrlValidationError,
   type FieldError,
 } from "./errors.ts";
+export { mergeUpdate } from "./merge.ts";
 export * from "./generated/resources.ts";
 export type * from "./generated/models.ts";

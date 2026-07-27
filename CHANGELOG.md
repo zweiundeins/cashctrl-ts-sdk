@@ -21,6 +21,26 @@ in minor releases as response inference improves.
 - `scripts/diff-spec.ts`, which renders the difference between two scraped
   specs as a readable summary (endpoints added or removed, parameters added,
   removed or retyped) rather than an unreadable generated-code diff.
+- `updatePreserving()` on the 33 resources that have an `update` endpoint,
+  plus the underlying `mergeUpdate()` helper. CashCtrl's update endpoints are
+  full replacements: "all parameters must be submitted, omitted parameters are
+  treated as empty values", so calling `update` with a partial payload
+  silently wipes every field left out. `updatePreserving` does the
+  read-modify-write, resending the record's current values for the writable
+  params and dropping read-only ones like `created` and `subTotal`.
+- `scripts/overrides.ts`, a small reviewed list of places where CashCtrl's
+  documentation contradicts the API's real behaviour, each with its evidence.
+
+### Fixed
+
+- Nested response fields that were `null` in every sample stayed `unknown` and
+  were unusable at a call site. Widening now recurses into nested objects and
+  arrays, so `order.items[].articleNr` and `tax.rates[].dateValid` get their
+  documented types.
+- `order.items[].unitId` is documented TEXT but is a foreign key to a numeric
+  unit id; it now accepts `string | number`.
+- `filter[].value` on list endpoints is documented TEXT but is routinely used
+  with numeric ids and booleans; it now accepts `string | number | boolean`.
 
 ## [0.1.0] - 2026-07-27
 

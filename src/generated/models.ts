@@ -534,7 +534,7 @@ export type Location = {
 export type OrderItem = {
   id: number;
   orderId: number;
-  inventoryId: unknown;
+  inventoryId: number | null;
   accountId: number;
   taxId: number;
   unitId: string;
@@ -542,12 +542,12 @@ export type OrderItem = {
   attachments: unknown[];
   allocations: unknown[];
   type: string;
-  articleNr: unknown;
+  articleNr: string | null;
   quantity: number;
   name: string;
   description: string;
   unitPrice: number;
-  discountPercentage: unknown;
+  discountPercentage: number | null;
   pos: number;
   netUnitPrice: number;
   grossTotal: number;
@@ -853,7 +853,7 @@ export type PersonContact = {
   type: string;
   purpose: unknown;
   address: string;
-  notes: unknown;
+  notes: string | null;
   pos: number;
 };
 
@@ -862,13 +862,13 @@ export type PersonAddress = {
   personId: number;
   titleId: unknown;
   type: string;
-  company: unknown;
-  firstName: unknown;
-  lastName: unknown;
+  company: string | null;
+  firstName: string | null;
+  lastName: string | null;
   address: string;
   zip: string;
   city: string;
-  canton: unknown;
+  canton: string | null;
   country: string;
   pos: number;
   hideName: boolean;
@@ -1122,7 +1122,7 @@ export type SalaryCertificateTemplateElement = {
   y: number;
   alignment: string;
   dataType: string | null;
-  fieldInfo: unknown;
+  fieldInfo: string | null;
   pos: number;
   fieldLabel: string;
   overridable: boolean;
@@ -1318,10 +1318,10 @@ export type SalaryStatementType = {
   debitId: number;
   creditId: number;
   rowName: string;
-  description: unknown;
-  dateStart: unknown;
-  dateEnd: unknown;
-  onlyMonth: unknown;
+  description: string | null;
+  dateStart: string | null;
+  dateEnd: string | null;
+  onlyMonth: number | null;
   allocationCount: number | null;
   costCenterIds: unknown;
   allocations: unknown[];
@@ -1339,7 +1339,7 @@ export type SalaryStatementInsurance = {
   id: number;
   statementId: number;
   contractId: number;
-  codeId: unknown;
+  codeId: number | null;
   personId: number;
   codeName: unknown;
   codeDescription: unknown;
@@ -1478,11 +1478,11 @@ export type SalaryTemplateType = {
   id: number;
   typeId: number;
   templateId: number;
-  debitId: unknown;
-  creditId: unknown;
-  rowName: unknown;
-  description: unknown;
-  onlyMonth: unknown;
+  debitId: number | null;
+  creditId: number | null;
+  rowName: string | null;
+  description: string | null;
+  onlyMonth: number | null;
   allocationCount: unknown;
   costCenterIds: unknown;
   allocations: unknown[];
@@ -1776,9 +1776,9 @@ export type TaxComponent = {
 
 export type TaxRate = {
   id: number;
-  dateValid: unknown;
+  dateValid: string | null;
   percentage: number;
-  percentageFlat: unknown;
+  percentageFlat: number | null;
 };
 
 export type Tax = {
@@ -1918,7 +1918,7 @@ export type AccountBankListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the balances. */
   fiscalPeriodId?: number | null;
@@ -1958,7 +1958,7 @@ export type AccountBankListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the balances. */
   fiscalPeriodId?: number | null;
@@ -2004,7 +2004,7 @@ export type AccountBankListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the balances. */
   fiscalPeriodId?: number | null;
@@ -2050,7 +2050,7 @@ export type AccountBankListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the balances. */
   fiscalPeriodId?: number | null;
@@ -2387,7 +2387,7 @@ export type AccountCostcenterListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the balances. */
   fiscalPeriodId?: number | null;
@@ -2429,7 +2429,7 @@ export type AccountCostcenterListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the balances. */
   fiscalPeriodId?: number | null;
@@ -2477,7 +2477,7 @@ export type AccountCostcenterListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the balances. */
   fiscalPeriodId?: number | null;
@@ -2525,7 +2525,7 @@ export type AccountCostcenterListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the balances. */
   fiscalPeriodId?: number | null;
@@ -2758,7 +2758,7 @@ export type AccountListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the balances. */
   fiscalPeriodId?: number | null;
@@ -2806,7 +2806,7 @@ export type AccountListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the balances. */
   fiscalPeriodId?: number | null;
@@ -2860,7 +2860,7 @@ export type AccountListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the balances. */
   fiscalPeriodId?: number | null;
@@ -2914,7 +2914,7 @@ export type AccountListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the balances. */
   fiscalPeriodId?: number | null;
@@ -3554,7 +3554,7 @@ export type FileListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -3622,7 +3622,7 @@ export type FileListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -3696,7 +3696,7 @@ export type FileListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -3770,7 +3770,7 @@ export type FileListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -4145,7 +4145,7 @@ export type HistoryListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -4474,7 +4474,7 @@ export type InventoryArticleListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -4548,7 +4548,7 @@ export type InventoryArticleListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -4628,7 +4628,7 @@ export type InventoryArticleListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -4708,7 +4708,7 @@ export type InventoryArticleListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -5147,7 +5147,7 @@ export type InventoryAssetListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the current values. */
   fiscalPeriodId?: number | null;
@@ -5217,7 +5217,7 @@ export type InventoryAssetListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the current values. */
   fiscalPeriodId?: number | null;
@@ -5293,7 +5293,7 @@ export type InventoryAssetListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the current values. */
   fiscalPeriodId?: number | null;
@@ -5369,7 +5369,7 @@ export type InventoryAssetListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the current values. */
   fiscalPeriodId?: number | null;
@@ -5666,7 +5666,7 @@ export type JournalImportEntryListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * Flag to only include entries with cost centers. Defaults to false.
@@ -5706,7 +5706,7 @@ export type JournalImportEntryListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * Flag to only include entries with cost centers. Defaults to false.
@@ -5752,7 +5752,7 @@ export type JournalImportEntryListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * Flag to only include entries with cost centers. Defaults to false.
@@ -5798,7 +5798,7 @@ export type JournalImportEntryListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * Flag to only include entries with cost centers. Defaults to false.
@@ -6214,7 +6214,7 @@ export type JournalListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the entries. */
   fiscalPeriodId?: number | null;
@@ -6313,7 +6313,7 @@ export type JournalListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the entries. */
   fiscalPeriodId?: number | null;
@@ -6418,7 +6418,7 @@ export type JournalListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the entries. */
   fiscalPeriodId?: number | null;
@@ -6523,7 +6523,7 @@ export type JournalListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the entries. */
   fiscalPeriodId?: number | null;
@@ -8216,7 +8216,7 @@ export type OrderCreateParams = {
     quantity?: number;
     taxId?: number;
     type?: "ARTICLE" | "TEXT" | "PAGEBREAK" | "SUBTOTAL" | "TITLE" | "OPTIONTOTAL";
-    unitId?: string;
+    unitId?: string | number;
   })[] | null;
   /** The language of the document. Possible values: DE, EN, FR, IT. */
   language?: "DE" | "EN" | "FR" | "IT" | null;
@@ -8343,7 +8343,7 @@ export type OrderListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the orders. */
   fiscalPeriodId?: number | null;
@@ -8416,7 +8416,7 @@ export type OrderListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the orders. */
   fiscalPeriodId?: number | null;
@@ -8495,7 +8495,7 @@ export type OrderListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the orders. */
   fiscalPeriodId?: number | null;
@@ -8574,7 +8574,7 @@ export type OrderListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the orders. */
   fiscalPeriodId?: number | null;
@@ -8802,7 +8802,7 @@ export type OrderUpdateParams = {
     quantity?: number;
     taxId?: number;
     type?: "ARTICLE" | "TEXT" | "PAGEBREAK" | "SUBTOTAL" | "TITLE" | "OPTIONTOTAL";
-    unitId?: string;
+    unitId?: string | number;
   })[] | null;
   /** The language of the document. Possible values: DE, EN, FR, IT. */
   language?: "DE" | "EN" | "FR" | "IT" | null;
@@ -9279,7 +9279,7 @@ export type PersonListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -9377,7 +9377,7 @@ export type PersonListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -9481,7 +9481,7 @@ export type PersonListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -9585,7 +9585,7 @@ export type PersonListVcfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -9689,7 +9689,7 @@ export type PersonListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -10967,7 +10967,7 @@ export type SalaryCertificateListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the entries. */
   fiscalPeriodId?: number | null;
@@ -11013,7 +11013,7 @@ export type SalaryCertificateListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the entries. */
   fiscalPeriodId?: number | null;
@@ -11065,7 +11065,7 @@ export type SalaryCertificateListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the entries. */
   fiscalPeriodId?: number | null;
@@ -11117,7 +11117,7 @@ export type SalaryCertificateListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the entries. */
   fiscalPeriodId?: number | null;
@@ -12016,7 +12016,7 @@ export type SalaryStatementListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the entries. */
   fiscalPeriodId?: number | null;
@@ -12075,7 +12075,7 @@ export type SalaryStatementListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the entries. */
   fiscalPeriodId?: number | null;
@@ -12140,7 +12140,7 @@ export type SalaryStatementListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the entries. */
   fiscalPeriodId?: number | null;
@@ -12205,7 +12205,7 @@ export type SalaryStatementListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /** The ID of the fiscal period, from which we retrieve the entries. */
   fiscalPeriodId?: number | null;
@@ -13165,7 +13165,7 @@ export type SalaryTypeListCsvParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -13227,7 +13227,7 @@ export type SalaryTypeListParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -13295,7 +13295,7 @@ export type SalaryTypeListPdfParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
@@ -13363,7 +13363,7 @@ export type SalaryTypeListXlsxParams = {
   filter?: readonly ({
     comparison?: "eq" | "like" | "gt" | "lt";
     field?: string;
-    value?: string;
+    value?: string | number | boolean;
   })[] | null;
   /**
    * The number of entries to retrieve. Defaults to 100.
