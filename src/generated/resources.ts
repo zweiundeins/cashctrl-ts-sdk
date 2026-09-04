@@ -14,6 +14,8 @@ export const ACCOUNTCATEGORY_UPDATE_FIELDS: readonly string[] = ["id","name","nu
 export const ACCOUNT_UPDATE_FIELDS: readonly string[] = ["categoryId","id","name","number","allocations","attachments","currencyId","custom","isInactive","notes","targetMax","targetMin","taxId"];
 /** Writable parameters of `/api/v1/currency/update.json`. */
 export const CURRENCY_UPDATE_FIELDS: readonly string[] = ["code","id","description","isDefault","rate"];
+/** Writable parameters of `/api/v1/customfield/update.json`. */
+export const CUSTOMFIELD_UPDATE_FIELDS: readonly string[] = ["dataType","id","rowLabel","type","fieldInfo","fieldLabel","fieldTextRight","groupId","isInactive","isMulti","maxWidth","values","variableName"];
 /** Writable parameters of `/api/v1/file/update.json`. */
 export const FILE_UPDATE_FIELDS: readonly string[] = ["id","name","categoryId","custom","description","notes","replaceWith"];
 /** Writable parameters of `/api/v1/fiscalperiod/update.json`. */
@@ -24,10 +26,14 @@ export const INVENTORYARTICLECATEGORY_UPDATE_FIELDS: readonly string[] = ["id","
 export const INVENTORYARTICLE_UPDATE_FIELDS: readonly string[] = ["id","name","attachments","binLocation","categoryId","currencyId","custom","description","isInactive","isPurchasePriceGross","isSalesPriceGross","isStockArticle","lastPurchasePrice","locationId","maxStock","minStock","notes","nr","salesPrice","sequenceNumberId","stock","unitId"];
 /** Writable parameters of `/api/v1/inventory/unit/update.json`. */
 export const INVENTORYUNIT_UPDATE_FIELDS: readonly string[] = ["id","name"];
+/** Writable parameters of `/api/v1/journal/import/entry/update.json`. */
+export const JOURNALIMPORTENTRY_UPDATE_FIELDS: readonly string[] = ["amount","contraAccountId","dateAdded","id","allocations","associateId","attachments","currencyId","currencyRate","custom","notes","orderId","reference","statementId","statusId","taxId","title"];
 /** Writable parameters of `/api/v1/journal/update.json`. */
 export const JOURNAL_UPDATE_FIELDS: readonly string[] = ["amount","creditId","debitId","id","allocations","associateId","attachments","currencyId","currencyRate","custom","dateAdded","daysBefore","endDate","items","notes","notifyEmail","notifyPersonId","notifyType","notifyUserId","recurrence","reference","sequenceNumberId","startDate","taxId","title"];
 /** Writable parameters of `/api/v1/location/update.json`. */
 export const LOCATION_UPDATE_FIELDS: readonly string[] = ["id","name","address","bankAccountId","burNr","canton","city","country","email","footer","isInactive","logoFileId","orgName","phoneMain","phoneSalaryCert","type","url","vatUid","zip"];
+/** Writable parameters of `/api/v1/order/bookentry/update.json`. */
+export const ORDERBOOKENTRY_UPDATE_FIELDS: readonly string[] = ["accountId","id","amount","currencyId","currencyRate","date","description","reference","taxId","templateId"];
 /** Writable parameters of `/api/v1/order/category/update.json`. */
 export const ORDERCATEGORY_UPDATE_FIELDS: readonly string[] = ["accountId","id","namePlural","nameSingular","status","addressType","bookTemplates","bookType","currencyId","dueDays","fileId","footerTemplateId","hasDueDays","headerTemplateId","isDisplayItemGross","isDisplayPrices","isInactive","isSwitchRecipient","layoutId","mailSubject","mailTemplateId","message","responsiblePersonId","roundingId","sentStatusId","sequenceNrId","type"];
 /** Writable parameters of `/api/v1/order/layout/update.json`. */
@@ -40,6 +46,10 @@ export const PERSONCATEGORY_UPDATE_FIELDS: readonly string[] = ["id","name","dis
 export const PERSONTITLE_UPDATE_FIELDS: readonly string[] = ["id","name","gender","sentence"];
 /** Writable parameters of `/api/v1/person/update.json`. */
 export const PERSON_UPDATE_FIELDS: readonly string[] = ["company","firstName","id","lastName","addresses","altName","attachments","bankAccounts","bankData","categoryId","certificateTemplateId","certificateValues","children","color","contacts","custom","dateBirth","department","discountPercentage","industry","insuranceContracts","insuranceMemberNr","insuranceNr","isAutoFillResponsiblePerson","isCustomer","isEmployee","isFamily","isInactive","isInsurance","isVendor","language","locationId","notes","nr","position","sequenceNumberId","servicePeriods","ssn","superiorId","titleId","userId","vatUid"];
+/** Writable parameters of `/api/v1/report/collection/update.json`. */
+export const REPORTCOLLECTION_UPDATE_FIELDS: readonly string[] = ["id","name","config","text"];
+/** Writable parameters of `/api/v1/report/element/update.json`. */
+export const REPORTELEMENT_UPDATE_FIELDS: readonly string[] = ["id","type","collectionId","columns","config","fileId","isHideTitle","isPageBreak","name","text"];
 /** Writable parameters of `/api/v1/rounding/update.json`. */
 export const ROUNDING_UPDATE_FIELDS: readonly string[] = ["accountId","id","name","rounding","mode"];
 /** Writable parameters of `/api/v1/salary/category/update.json`. */
@@ -739,8 +749,8 @@ export class CurrencyResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/currency/exchangerate
    */
-  exchangerate(params: M.CurrencyExchangerateParams, signal?: AbortSignal): Promise<string> {
-    return this.#http.get<string>("/api/v1/currency/exchangerate", params, signal);
+  exchangerate(params: M.CurrencyExchangerateParams, signal?: AbortSignal): Promise<number> {
+    return this.#http.get<number>("/api/v1/currency/exchangerate", params, signal);
   }
 
   /**
@@ -927,8 +937,8 @@ export class CustomfieldResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/customfield/list.json
    */
-  list(params: M.CustomfieldListParams, signal?: AbortSignal): Promise<unknown[]> {
-    return this.#http.list<unknown>("/api/v1/customfield/list.json", params, signal);
+  list(params: M.CustomfieldListParams, signal?: AbortSignal): Promise<M.Customfield[]> {
+    return this.#http.list<M.Customfield>("/api/v1/customfield/list.json", params, signal);
   }
 
   /**
@@ -938,8 +948,8 @@ export class CustomfieldResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/customfield/read.json
    */
-  async read(params: M.CustomfieldReadParams, signal?: AbortSignal): Promise<unknown> {
-    return (await this.#http.get<{ data: unknown }>("/api/v1/customfield/read.json", params, signal)).data;
+  async read(params: M.CustomfieldReadParams, signal?: AbortSignal): Promise<M.Customfield> {
+    return (await this.#http.get<{ data: M.Customfield }>("/api/v1/customfield/read.json", params, signal)).data;
   }
 
   /**
@@ -976,6 +986,29 @@ export class CustomfieldResource {
    */
   update(params: M.CustomfieldUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/customfield/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/customfield/update.json` replaces the entire record: any writable
+   * parameter left out is treated as empty and cleared. This reads the current
+   * values from `existing` and applies `changes` on top, so only what you name
+   * actually changes.
+   * ```ts
+   * const current = await client.customfield.read({ id });
+   * await client.customfield.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.CustomfieldUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.CustomfieldUpdateParams>(existing, changes, CUSTOMFIELD_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -2275,8 +2308,8 @@ export class JournalImportEntryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/journal/import/entry/list.json
    */
-  list(params: M.JournalImportEntryListParams, signal?: AbortSignal): Promise<unknown[]> {
-    return this.#http.list<unknown>("/api/v1/journal/import/entry/list.json", params, signal);
+  list(params: M.JournalImportEntryListParams, signal?: AbortSignal): Promise<M.JournalImportEntry[]> {
+    return this.#http.list<M.JournalImportEntry>("/api/v1/journal/import/entry/list.json", params, signal);
   }
 
   /**
@@ -2308,8 +2341,8 @@ export class JournalImportEntryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/journal/import/entry/read.json
    */
-  async read(params: M.JournalImportEntryReadParams, signal?: AbortSignal): Promise<unknown> {
-    return (await this.#http.get<{ data: unknown }>("/api/v1/journal/import/entry/read.json", params, signal)).data;
+  async read(params: M.JournalImportEntryReadParams, signal?: AbortSignal): Promise<M.JournalImportEntry> {
+    return (await this.#http.get<{ data: M.JournalImportEntry }>("/api/v1/journal/import/entry/read.json", params, signal)).data;
   }
 
   /**
@@ -2348,6 +2381,29 @@ export class JournalImportEntryResource {
    */
   update(params: M.JournalImportEntryUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/journal/import/entry/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/journal/import/entry/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.journal.import.entry.read({ id });
+   * await client.journal.import.entry.updatePreserving(current, { id,
+   * description: "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.JournalImportEntryUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.JournalImportEntryUpdateParams>(existing, changes, JOURNALIMPORTENTRY_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -2697,8 +2753,8 @@ export class OrderBookentryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/order/bookentry/list.json
    */
-  list(params: M.OrderBookentryListParams, signal?: AbortSignal): Promise<unknown[]> {
-    return this.#http.list<unknown>("/api/v1/order/bookentry/list.json", params, signal);
+  list(params: M.OrderBookentryListParams, signal?: AbortSignal): Promise<M.OrderBookentry[]> {
+    return this.#http.list<M.OrderBookentry>("/api/v1/order/bookentry/list.json", params, signal);
   }
 
   /**
@@ -2708,8 +2764,8 @@ export class OrderBookentryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/order/bookentry/read.json
    */
-  async read(params: M.OrderBookentryReadParams, signal?: AbortSignal): Promise<unknown> {
-    return (await this.#http.get<{ data: unknown }>("/api/v1/order/bookentry/read.json", params, signal)).data;
+  async read(params: M.OrderBookentryReadParams, signal?: AbortSignal): Promise<M.OrderBookentry> {
+    return (await this.#http.get<{ data: M.OrderBookentry }>("/api/v1/order/bookentry/read.json", params, signal)).data;
   }
 
   /**
@@ -2725,6 +2781,29 @@ export class OrderBookentryResource {
    */
   update(params: M.OrderBookentryUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/order/bookentry/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/order/bookentry/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.order.bookentry.read({ id });
+   * await client.order.bookentry.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.OrderBookentryUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.OrderBookentryUpdateParams>(existing, changes, ORDERBOOKENTRY_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -2778,8 +2857,8 @@ export class OrderCategoryResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/order/category/read_status.json
    */
-  readStatus(params: M.OrderCategoryReadStatusParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/order/category/read_status.json", params, signal);
+  async readStatus(params: M.OrderCategoryReadStatusParams, signal?: AbortSignal): Promise<M.OrderCategoryReadStatusResult> {
+    return (await this.#http.get<{ data: M.OrderCategoryReadStatusResult }>("/api/v1/order/category/read_status.json", params, signal)).data;
   }
 
   /**
@@ -3766,8 +3845,8 @@ export class ReportCollectionResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/report/collection/meta.json
    */
-  meta(params: M.ReportCollectionMetaParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/report/collection/meta.json", params, signal);
+  async meta(params: M.ReportCollectionMetaParams, signal?: AbortSignal): Promise<M.ReportCollectionMetaResult> {
+    return (await this.#http.get<{ data: M.ReportCollectionMetaResult }>("/api/v1/report/collection/meta.json", params, signal)).data;
   }
 
   /**
@@ -3779,8 +3858,8 @@ export class ReportCollectionResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/report/collection/read.json
    */
-  async read(params: M.ReportCollectionReadParams, signal?: AbortSignal): Promise<unknown> {
-    return (await this.#http.get<{ data: unknown }>("/api/v1/report/collection/read.json", params, signal)).data;
+  async read(params: M.ReportCollectionReadParams, signal?: AbortSignal): Promise<M.ReportCollection> {
+    return (await this.#http.get<{ data: M.ReportCollection }>("/api/v1/report/collection/read.json", params, signal)).data;
   }
 
   /**
@@ -3807,6 +3886,29 @@ export class ReportCollectionResource {
    */
   update(params: M.ReportCollectionUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/report/collection/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/report/collection/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.report.collection.read({ id });
+   * await client.report.collection.updatePreserving(current, { id,
+   * description: "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.ReportCollectionUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.ReportCollectionUpdateParams>(existing, changes, REPORTCOLLECTION_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 
@@ -3848,8 +3950,8 @@ export class ReportElementResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/report/element/data.json
    */
-  data(params: M.ReportElementDataParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/report/element/data.json", params, signal);
+  async data(params: M.ReportElementDataParams, signal?: AbortSignal): Promise<M.ReportElementDataResult[]> {
+    return (await this.#http.get<{ data: M.ReportElementDataResult[] }>("/api/v1/report/element/data.json", params, signal)).data;
   }
 
   /**
@@ -3920,8 +4022,8 @@ export class ReportElementResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/report/element/meta.json
    */
-  meta(params: M.ReportElementMetaParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/report/element/meta.json", params, signal);
+  async meta(params: M.ReportElementMetaParams, signal?: AbortSignal): Promise<M.ReportElementMetaResult> {
+    return (await this.#http.get<{ data: M.ReportElementMetaResult }>("/api/v1/report/element/meta.json", params, signal)).data;
   }
 
   /**
@@ -3932,8 +4034,8 @@ export class ReportElementResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/report/element/read.json
    */
-  async read(params: M.ReportElementReadParams, signal?: AbortSignal): Promise<unknown> {
-    return (await this.#http.get<{ data: unknown }>("/api/v1/report/element/read.json", params, signal)).data;
+  async read(params: M.ReportElementReadParams, signal?: AbortSignal): Promise<M.ReportElement> {
+    return (await this.#http.get<{ data: M.ReportElement }>("/api/v1/report/element/read.json", params, signal)).data;
   }
 
   /**
@@ -3960,6 +4062,29 @@ export class ReportElementResource {
    */
   update(params: M.ReportElementUpdateParams, signal?: AbortSignal): Promise<WriteEnvelope> {
     return this.#http.post<WriteEnvelope>("/api/v1/report/element/update.json", params, signal);
+  }
+
+  /**
+   * Updates while preserving fields you do not pass.
+   * `/api/v1/report/element/update.json` replaces the entire record: any
+   * writable parameter left out is treated as empty and cleared. This reads
+   * the current values from `existing` and applies `changes` on top, so only
+   * what you name actually changes.
+   * ```ts
+   * const current = await client.report.element.read({ id });
+   * await client.report.element.updatePreserving(current, { id, description:
+   * "New" });
+   * ```
+   */
+  updatePreserving(
+    existing: Readonly<Record<string, unknown>>,
+    changes: Partial<M.ReportElementUpdateParams>,
+    signal?: AbortSignal,
+  ): Promise<WriteEnvelope> {
+    return this.update(
+      mergeUpdate<M.ReportElementUpdateParams>(existing, changes, REPORTELEMENT_UPDATE_FIELDS),
+      signal,
+    );
   }
 }
 

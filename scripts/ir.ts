@@ -46,6 +46,9 @@ export interface Spec {
 /** A response shape inferred from live API calls (spec/responses.json). */
 export type Shape =
   | { kind: "scalar"; types: ScalarType[] }
+  /** A reference back to the enclosing object type. Generator-only: the
+   * prober never emits it, the recursion fold in generate.ts introduces it. */
+  | { kind: "self" }
   | { kind: "object"; fields: Record<string, ShapeField> }
   | { kind: "array"; items: Shape }
   | { kind: "unknown" };

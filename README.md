@@ -36,9 +36,9 @@ The npm build ships ESM and CommonJS with `.d.ts` declarations, has zero
 dependencies, and requires Node 18+. It does not depend on Deno at install or
 run time. The SDK source uses no Deno APIs; only the build tooling is Deno.
 
-You need an API key: in CashCtrl, go to **Settings > Users & Roles > Add >
-Add API user**. The key is scoped to a single organisation and inherits the
-role you assign it.
+You need an API key: in CashCtrl, go to **Settings > Users & Roles > Add > Add
+API user**. The key is scoped to a single organisation and inherits the role you
+assign it.
 
 ## Usage
 
@@ -97,12 +97,12 @@ try {
 }
 ```
 
-| Error | When |
-| --- | --- |
+| Error                     | When                           |
+| ------------------------- | ------------------------------ |
 | `CashCtrlValidationError` | HTTP 200 with `success: false` |
-| `CashCtrlAuthError` | 401, 403 |
-| `CashCtrlRateLimitError` | 429, carries `retryAfter` |
-| `CashCtrlHttpError` | any other non-2xx |
+| `CashCtrlAuthError`       | 401, 403                       |
+| `CashCtrlRateLimitError`  | 429, carries `retryAfter`      |
+| `CashCtrlHttpError`       | any other non-2xx              |
 
 429 and 5xx are retried with exponential backoff by default. Configure with
 `retry: { attempts, baseDelayMs }`, or `attempts: 0` to disable.
@@ -112,14 +112,14 @@ try {
 The API is form-encoded even though it returns JSON, so the SDK flattens
 structured values for you:
 
-| You pass | Sent as |
-| --- | --- |
-| `true` | `"true"` |
-| `new Date(2026, 6, 27)` | `"2026-07-27"` |
-| `[1, 2, 3]` (a CSV param) | `"1,2,3"` |
-| `[{...}]` (a JSON param) | `'[{"...":...}]'` |
-| `null` | `""`, clearing the field |
-| `undefined` | omitted entirely |
+| You pass                  | Sent as                  |
+| ------------------------- | ------------------------ |
+| `true`                    | `"true"`                 |
+| `new Date(2026, 6, 27)`   | `"2026-07-27"`           |
+| `[1, 2, 3]` (a CSV param) | `"1,2,3"`                |
+| `[{...}]` (a JSON param)  | `'[{"...":...}]'`        |
+| `null`                    | `""`, clearing the field |
+| `undefined`               | omitted entirely         |
 
 The `null` versus `undefined` distinction matters on `update` endpoints, which
 treat an omitted parameter as an empty value.
@@ -135,10 +135,10 @@ CashCtrl stores translatable fields as an XML blob rather than a JSON object:
 ```ts
 import { localize, toLocalized } from "@zweiundeins/cashctrl-ts-sdk";
 
-localize(account.name, "en");              // "Cash"
-localize(account.name, "it");              // falls back if `it` is missing
-localize("Plain text", "en");              // "Plain text" (passes through)
-toLocalized({ de: "Kasse", en: "Cash" });  // "<values><de>Kasse</de>...</values>"
+localize(account.name, "en"); // "Cash"
+localize(account.name, "it"); // falls back if `it` is missing
+localize("Plain text", "en"); // "Plain text" (passes through)
+toLocalized({ de: "Kasse", en: "Cash" }); // "<values><de>Kasse</de>...</values>"
 ```
 
 ### Documents
@@ -153,8 +153,8 @@ await Deno.writeFile("invoice.pdf", new Uint8Array(await pdf.arrayBuffer()));
 
 Most are recognisable by a format suffix (`.pdf`, `.xlsx`, `.csv`, `.zip`,
 `.vcf`, `.xml`, `.html`). Four are not — `file.get()`, `domain.current.logo()`,
-`order.payment.download()` and `salary.payment.download()` — but they behave
-the same way. `file.get()` redirects to object storage; `fetch` follows it.
+`order.payment.download()` and `salary.payment.download()` — but they behave the
+same way. `file.get()` redirects to object storage; `fetch` follows it.
 
 ### Escape hatch
 
@@ -190,7 +190,10 @@ Two GET endpoints change state, so "it is a GET, so it is safe" does not hold
 here. They are exported for anything that decides what to call automatically:
 
 ```ts
-import { isSideEffectingGet, SIDE_EFFECTING_GETS } from "@zweiundeins/cashctrl-ts-sdk";
+import {
+  isSideEffectingGet,
+  SIDE_EFFECTING_GETS,
+} from "@zweiundeins/cashctrl-ts-sdk";
 ```
 
 `fiscalperiod/reopen_months.json` reopens closed months, and
@@ -201,7 +204,7 @@ back.
 
 ```
 scripts/scrape-docs.ts   HTML reference -> spec/api.json        376 endpoints
-scripts/probe-api.ts     live GET calls -> spec/responses.json   95 shapes
+scripts/probe-api.ts     live GET calls -> spec/responses.json  108 shapes
 scripts/generate.ts      both           -> src/generated/*, spec/openapi.json
 scripts/build-index.ts   spec/api.json  -> spec/index.json        search index
 ```
@@ -221,20 +224,44 @@ deno task ci          # everything CI runs
 CashCtrl ships API changes without announcing them, so
 [`.github/workflows/upstream.yml`](.github/workflows/upstream.yml) re-scrapes
 their reference every Monday, regenerates, and opens a PR when anything moved.
-`scripts/diff-spec.ts` turns the change into a readable summary (endpoints
-added or removed, parameters added, removed or retyped) that becomes the PR
-body, so the generated-code diff never has to be read directly.
+`scripts/diff-spec.ts` turns the change into a readable summary (endpoints added
+or removed, parameters added, removed or retyped) that becomes the PR body, so
+the generated-code diff never has to be read directly.
 
 ```sh
 deno run --allow-read --allow-write scripts/diff-spec.ts old.json new.json
 ```
 
+### How probing reaches parameterised endpoints
+
+Most read endpoints need an id, so the prober harvests them: it calls the `list`
+and `tree` endpoints first and reuses their ids for the sibling `read.json`.
+Where that convention does not hold - the parameter is not called `id`, or the
+value lives under another resource, or inside a nested array - a small
+`FIXTURES` table says where to look, and the prober runs several passes so
+chains resolve (`journal/import/list` yields an import id, which yields import
+entries, which yield one to read).
+
+Three details matter for type quality:
+
+- **Up to three records are sampled per endpoint**, not one. A field that is
+  null on the first record is often populated on the third, and a tree node only
+  reveals children if the sampled record has any.
+- **A mandatory parameter with documented values is probed once per value.**
+  `customfield/list` returns different fields per module.
+- **A failed call never replaces a good shape.** This job runs weekly and
+  unattended; a transient 500 upstream silently downgrading the generated types
+  would be worse than leaving them stale.
+
 `deno task probe` is **read-only by construction**: it calls only GET endpoints
 whose final path segment is on a verb allowlist (`list`, `read`, `tree`,
 `balance`, ...), and hard-denies the GET endpoints that have side effects,
 namely `fiscalperiod/reopen_months.json` (reopens closed months) and
-`sequencenumber/get` (consumes a sequence number). It never issues a POST.
-`spec/responses.json` records field names and types only, never values.
+`sequencenumber/get` (consumes a sequence number). Document reads are denied
+too: fetching an order or salary document appends a `DOWNLOAD` entry to the
+organisation's history log, and an audit log is the wrong place to leave a
+trace. It never issues a POST. `spec/responses.json` records field names and
+types only, never values.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
@@ -242,12 +269,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 Be clear-eyed about what is and is not verified.
 
-| Layer | Coverage | How |
-| --- | --- | --- |
-| Request construction | **376/376 (100%)** | `tests/contract_test.ts`, mock transport |
-| Response shapes | 95/376 (25%) | live read-only probing, one organisation |
-| Full CRUD round-trips | 8 resources | `scripts/roundtrip-test.ts`, live writes |
-| Accounting writes (orders, journal) | **0%** | needs a disposable organisation |
+| Layer                               | Coverage           | How                                      |
+| ----------------------------------- | ------------------ | ---------------------------------------- |
+| Request construction                | **376/376 (100%)** | `tests/contract_test.ts`, mock transport |
+| Response shapes                     | 108/376 (29%)      | live read-only probing, one organisation |
+| Full CRUD round-trips               | 8 resources        | `scripts/roundtrip-test.ts`, live writes |
+| Accounting writes (orders, journal) | **0%**             | needs a disposable organisation          |
 
 `tests/contract_test.ts` calls every generated method with every documented
 parameter and asserts the HTTP verb, the exact URL path, that each parameter
@@ -258,14 +285,14 @@ serializer, so a bug cannot be mirrored into the expectation.
 It is mutation-tested. Each of these deliberate faults is caught, with the
 number of endpoints that flag it:
 
-| Injected fault | Endpoints failing |
-| --- | --- |
-| One endpoint path corrupted | 1 |
-| A POST issued as a GET | 42 |
-| `true` encoded as `1` | 410 |
-| Dates as `DD.MM.YYYY` | 83 |
-| CSV joined with `;` | 140 |
-| One parameter silently dropped | 54 |
+| Injected fault                 | Endpoints failing |
+| ------------------------------ | ----------------- |
+| One endpoint path corrupted    | 1                 |
+| A POST issued as a GET         | 42                |
+| `true` encoded as `1`          | 410               |
+| Dates as `DD.MM.YYYY`          | 83                |
+| CSV joined with `;`            | 140               |
+| One parameter silently dropped | 54                |
 
 ### Live round-trips
 
@@ -298,24 +325,23 @@ typechecked and contract-tested, but never executed. Treat them as unproven.
 These are the honest limits of generating from a source never meant to be
 machine-read:
 
-- **Request params are authoritative; response types are best-effort.** The
-  docs specify parameters only. Entity types are inferred from live responses
-  in a single organisation (95 of 376 endpoints), so a field that organisation
-  never populated may be typed more loosely than reality.
+- **Request params are authoritative; response types are best-effort.** The docs
+  specify parameters only. Entity types are inferred from live responses in a
+  single organisation (108 of 376 endpoints), so a field that organisation never
+  populated may be typed more loosely than reality.
 - Fields that were `null` in every sample are widened using the documented
   request param type where one exists (`taxId` becomes `number | null`), and
   typed `unknown` otherwise.
 - Arrays empty in every sample infer as `unknown[]`.
-- 8 endpoints failed probing (missing fixtures, or a 500 on that organisation)
-  and fall back to `unknown`. Each is recorded with its error in
-  `spec/responses.json`.
-- POST endpoints are never probed, so writes return the generic
-  `WriteEnvelope`.
+- 1 endpoint failed probing and falls back to `unknown`; it is recorded with its
+  error in `spec/responses.json`. A further 8 are skipped because the
+  organisation has no records of that kind to read.
+- POST endpoints are never probed, so writes return the generic `WriteEnvelope`.
 - Entity types merge the `read.json` and `list.json` shapes, so fields only
   `read` returns are marked optional.
 
-Re-running `deno task probe && deno task generate` against your own
-organisation will tighten the types for your data.
+Re-running `deno task probe && deno task generate` against your own organisation
+will tighten the types for your data.
 
 ## License
 
