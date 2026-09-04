@@ -35,5 +35,6 @@ export {
   type FieldError,
 } from "./errors.ts";
 export { mergeUpdate } from "./merge.ts";
+export { isSideEffectingGet, SIDE_EFFECTING_GETS } from "./safety.ts";
 export * from "./generated/resources.ts";
 export type * from "./generated/models.ts";

@@ -143,13 +143,18 @@ toLocalized({ de: "Kasse", en: "Cash" });  // "<values><de>Kasse</de>...</values
 
 ### Documents
 
-Endpoints returning PDF/XLSX/CSV/ZIP/vCard hand back the raw `Response` so you
-can stream it:
+The 59 endpoints that return a file hand back the raw `Response` so you can
+stream it:
 
 ```ts
 const pdf = await cc.order.document.readPdf({ ids: orderId });
 await Deno.writeFile("invoice.pdf", new Uint8Array(await pdf.arrayBuffer()));
 ```
+
+Most are recognisable by a format suffix (`.pdf`, `.xlsx`, `.csv`, `.zip`,
+`.vcf`, `.xml`, `.html`). Four are not — `file.get()`, `domain.current.logo()`,
+`order.payment.download()` and `salary.payment.download()` — but they behave
+the same way. `file.get()` redirects to object storage; `fetch` follows it.
 
 ### Escape hatch
 
@@ -174,16 +179,36 @@ endpoints, valid under `redocly lint`. Use it with any generator or API client.
 It is kept in the repo rather than shipped in the package, to keep installs
 small.
 
+Response schemas are inlined per endpoint, which is why the file is 1.9 MB.
+[`spec/index.json`](spec/index.json) is the same surface without them — every
+endpoint and parameter with prose capped at 200 characters, 450 KB — for tools
+that need to search the whole API rather than call one part of it.
+
+### Side-effecting GETs
+
+Two GET endpoints change state, so "it is a GET, so it is safe" does not hold
+here. They are exported for anything that decides what to call automatically:
+
+```ts
+import { isSideEffectingGet, SIDE_EFFECTING_GETS } from "@zweiundeins/cashctrl-ts-sdk";
+```
+
+`fiscalperiod/reopen_months.json` reopens closed months, and
+`sequencenumber/get` consumes the next number in a sequence without giving it
+back.
+
 ## How generation works
 
 ```
 scripts/scrape-docs.ts   HTML reference -> spec/api.json        376 endpoints
 scripts/probe-api.ts     live GET calls -> spec/responses.json   95 shapes
 scripts/generate.ts      both           -> src/generated/*, spec/openapi.json
+scripts/build-index.ts   spec/api.json  -> spec/index.json        search index
 ```
 
 ```sh
 deno task generate    # regenerate from the committed specs (offline)
+deno task index       # rebuild the search index
 deno task scrape      # re-scrape the docs (--refresh bypasses the cache)
 deno task probe       # re-probe response shapes (needs an API key)
 deno task test        # unit tests, no network

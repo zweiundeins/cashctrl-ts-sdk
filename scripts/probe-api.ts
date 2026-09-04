@@ -13,6 +13,7 @@
  *   deno run -A --env-file=.env scripts/probe-api.ts [--limit N] [--verbose]
  */
 
+import { SIDE_EFFECTING_GETS } from "../src/safety.ts";
 import type {
   Endpoint,
   InferredResponse,
@@ -46,8 +47,8 @@ const SAFE_VERBS = new Set([
 
 /** Never called, regardless of method or verb. */
 const DENY = [
-  "/api/v1/fiscalperiod/reopen_months.json",
-  "/api/v1/sequencenumber/get",
+  ...SIDE_EFFECTING_GETS,
+  // Not side-effecting, but they operate on a staged import that may not exist.
   "/api/v1/inventory/article/import/preview.json",
   "/api/v1/person/import/preview.json",
 ];

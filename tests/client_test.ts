@@ -148,6 +148,34 @@ Deno.test("document endpoints return the raw Response", async () => {
   assertEquals(await response.text(), "%PDF-1.4");
 });
 
+Deno.test("suffix-less file endpoints return the raw Response too", async () => {
+  // These four have no format suffix to give them away, so they used to be
+  // generated as JSON calls and threw when handed a PDF.
+  const { client, calls } = stub(() =>
+    new Response("%PDF-1.4", { headers: { "content-type": "application/pdf" } })
+  );
+  const response = await client.file.get({ id: 7 });
+  assertEquals(response instanceof Response, true);
+  assertEquals(await response.text(), "%PDF-1.4");
+  assertEquals(calls[0].url.pathname, "/api/v1/file/get");
+
+  assertEquals((await client.domain.current.logo()) instanceof Response, true);
+  assertEquals(
+    (await client.order.payment.download({
+      date: "2026-01-31",
+      orderIds: 1,
+    })) instanceof Response,
+    true,
+  );
+  assertEquals(
+    (await client.salary.payment.download({
+      date: "2026-01-31",
+      statementIds: 1,
+    })) instanceof Response,
+    true,
+  );
+});
+
 Deno.test("nested resources route to the right path", async () => {
   const { client, calls } = stub(() => json({ data: [] }));
   await client.account.costcenter.category.list();
