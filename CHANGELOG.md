@@ -10,6 +10,16 @@ in minor releases as response inference improves.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-04
+
+**Upgrade from 0.2.0.** Four methods change their return type from
+`Promise<unknown>` to `Promise<Response>`: `file.get()`,
+`domain.current.logo()`, `order.payment.download()` and
+`salary.payment.download()`. Nothing was calling them successfully — they
+parsed their file body as JSON and threw — so there is no working code to
+migrate. Await `.arrayBuffer()` or `.text()` on the result, as with the other
+document endpoints.
+
 ### Fixed
 
 - Four endpoints that return a file had no format suffix to give them away, so
@@ -147,6 +157,7 @@ response envelope.
   Response types are inferred from one organisation's live data across 95 of
   376 endpoints, so they are best-effort. See the README's Caveats section.
 
-[Unreleased]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/releases/tag/v0.1.0
