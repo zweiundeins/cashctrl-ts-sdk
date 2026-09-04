@@ -108,9 +108,48 @@ export type Currency = {
   isAuto: boolean;
 };
 
+export type Customfield = {
+  id: number;
+  created: string;
+  createdBy: string;
+  lastUpdated: string;
+  lastUpdatedBy: string;
+  categoryId: unknown;
+  groupId: string | null;
+  variableId: unknown;
+  rowLabel: string;
+  fieldLabel: string | null;
+  fieldTextRight: string | null;
+  fieldInfo: string;
+  maxWidth: number | null;
+  type: string;
+  dataType: string;
+  values: string;
+  pos: number;
+  defaultVariableName: string;
+  multi: boolean;
+  name: string;
+  inactive: boolean;
+  variableName: string;
+  groupName: unknown;
+  columnName: string;
+  fieldId: string;
+  isMulti: boolean;
+  isInactive: boolean;
+};
+
 export type CustomfieldTypesResult = {
   i18nKey: string;
   name: string;
+};
+
+export type FileAttachedTo = {
+  id: number;
+  fileId: number;
+  journalImportId: number;
+  pos: unknown;
+  name: string;
+  mimeType: string;
 };
 
 export type File = {
@@ -119,18 +158,28 @@ export type File = {
   createdBy: string;
   lastUpdated: string;
   lastUpdatedBy: string;
-  categoryId: number | null;
-  categoryName: unknown;
   name: string;
-  description: string | null;
   mimeType: string;
-  dateArchived: unknown;
-  attachedCount: number;
   size: number;
-  notes: string | null;
+  categoryId: number | null;
+  attachedTo?: FileAttachedTo[];
+  parentId?: unknown;
+  description: string | null;
   custom: string | null;
-  attached: boolean;
-  isAttached: boolean;
+  notes: string | null;
+  lastAccessed?: string;
+  lastAccessedBy?: string;
+  dateArchived: unknown;
+  archived?: boolean;
+  thumbnailFileId?: unknown;
+  extension?: string;
+  temporary?: boolean;
+  isTemporary?: boolean;
+  isArchived?: boolean;
+  categoryName?: unknown;
+  attachedCount?: number;
+  attached?: boolean;
+  isAttached?: boolean;
 };
 
 export type FileCategoryTreeResult = {
@@ -169,8 +218,8 @@ export type Fiscalperiod = {
   availableMonthIds: string[];
   closedSalaryMonthIds: string[];
   availableSalaryMonthIds: string[];
-  openMonthIds: unknown[];
-  openSalaryMonthIds: unknown[];
+  openMonthIds: string[];
+  openSalaryMonthIds: string[];
   transient: boolean;
   closed: boolean;
   current: boolean;
@@ -216,20 +265,20 @@ export type InventoryArticle = {
   currentValue?: unknown;
   salesAccountIdInherited?: number;
   purchaseAccountIdInherited?: number;
-  allocations?: unknown[];
   sequenceNrId?: number;
+  allocations?: unknown[];
   purchaseAccountId: number;
   salesAccountId: number;
   salesPriceGross: boolean;
   fullName?: string;
-  inactive: boolean;
   sequenceNrIdInherited?: number;
+  inactive: boolean;
   categoryName?: string;
   isInactive: boolean;
   isSalesPriceGross: boolean;
-  isStockArticle: boolean;
-  isPurchasePriceGross: boolean;
   isDefaultCurrency?: boolean;
+  isPurchasePriceGross: boolean;
+  isStockArticle: boolean;
   categoryDisplay?: string;
   unitName?: string;
   locationName?: unknown;
@@ -242,8 +291,8 @@ export type InventoryArticle = {
   allocationCount?: number;
   costCenterIds?: unknown;
   costCenterNumbers?: unknown;
-  stockArticle?: boolean;
   purchasePriceGross?: boolean;
+  stockArticle?: boolean;
 };
 
 export type InventoryArticleCategory = {
@@ -259,7 +308,7 @@ export type InventoryArticleCategory = {
   allocations: unknown[];
   type: string;
   name: string;
-  sequenceNrIdInherited: unknown;
+  sequenceNrIdInherited: number | null;
 };
 
 export type InventoryArticleImportMappingComboResult = {
@@ -290,8 +339,8 @@ export type JournalRow = {
   taxPercentage: unknown;
   accountName: string;
   accountId: number;
-  isTax: boolean;
   isTaxed: boolean;
+  isTax: boolean;
 };
 
 export type JournalAssociateContact = {
@@ -315,22 +364,62 @@ export type JournalAssociateAddress = {
   address: string;
   zip: string;
   city: string;
-  canton: unknown;
-  country: string;
+  canton: string | null;
+  country: string | null;
   pos: number;
   hideName: boolean;
   hideCompany: boolean;
-  companyForAddress: string;
+  companyForAddress: string | null;
   firstNameForAddress: string;
   lastNameForAddress: string;
   streetName: string;
   streetNumber: string;
   titleName: string;
-  cantonCode: unknown;
-  countryCode2: string;
-  countryCode3: string;
+  cantonCode: string | null;
+  countryCode2: string | null;
+  countryCode3: string | null;
   isHideCompany: boolean;
   isHideName: boolean;
+};
+
+export type JournalAssociateBankAccount = {
+  id: number;
+  personId: number;
+  currencyId: unknown;
+  type: string;
+  iban: string;
+  bic: unknown;
+  notes: string;
+  pos: number;
+};
+
+export type JournalAssociateServicePeriod = {
+  id: number;
+  personId: number;
+  dateEntry: string;
+  dateExit: unknown;
+  notes: unknown;
+};
+
+export type JournalAssociateChildren = {
+  id: number;
+  personId: number;
+  name: string;
+  dateBirth: string;
+  dateBenefitBegin: string;
+  dateBenefitEnd: unknown;
+  dateInEducation: unknown;
+  notes: unknown;
+  age: number;
+};
+
+export type JournalAssociateAttachment = {
+  id: number;
+  fileId: number;
+  personId: number;
+  pos: number;
+  name: string;
+  mimeType: string;
 };
 
 export type JournalAssociate = {
@@ -342,25 +431,23 @@ export type JournalAssociate = {
   categoryId: number;
   contacts: JournalAssociateContact[];
   addresses: JournalAssociateAddress[];
-  bankAccounts: unknown[];
-  servicePeriods: unknown[];
-  children: unknown[];
+  bankAccounts: JournalAssociateBankAccount[];
+  servicePeriods: JournalAssociateServicePeriod[];
+  children: JournalAssociateChildren[];
   insuranceContracts: unknown[];
-  attachments: unknown[];
+  attachments: JournalAssociateAttachment[];
   titleId: number;
   nr: string;
   name: string;
   firstName: string;
   lastName: string;
-  company: string;
-  industry: string;
+  company?: string;
   custom: string;
   emailWork: string;
-  url: string;
+  phoneWork?: string;
   address: string;
   zip: string;
   city: string;
-  country: string;
   attachmentCount: number;
   fullName: string;
   inactive: boolean;
@@ -375,8 +462,6 @@ export type JournalAssociate = {
   numberOfChildren: number;
   abbreviatedName: string;
   categoryName: string;
-  countryCode2: string;
-  countryCode3: string;
   iconCls: string;
   certificateValuesMap: Record<string, unknown>;
   isCustomer: boolean;
@@ -386,6 +471,25 @@ export type JournalAssociate = {
   isFamily: boolean;
   isInactive: boolean;
   isAutoFillResponsiblePerson: boolean;
+  thumbnailFileId?: number;
+  language?: string;
+  dateBirth?: string;
+  emailPrivate?: string;
+  phonePrivate?: string;
+  canton?: string;
+  country?: string;
+  userId?: number;
+  age?: number;
+  ssn?: string;
+  locationId?: number;
+  certificateTemplateId?: number;
+  certificateValues?: string;
+  languageName?: string;
+  languageCode?: string;
+  cantonCode?: string;
+  countryCode2?: string;
+  countryCode3?: string;
+  locationName?: string;
 };
 
 export type Journal = {
@@ -398,9 +502,9 @@ export type Journal = {
   debitId: number;
   associateId: number;
   taxId: number | null;
-  orderId: number;
+  orderId: number | null;
   orderBookEntryId: unknown;
-  statementId: unknown;
+  statementId: number | null;
   salaryBookEntryId: unknown;
   inventoryId: unknown;
   currencyId: number | null;
@@ -428,22 +532,22 @@ export type Journal = {
   imported: unknown;
   importedBy: unknown;
   costCenterNumbers: unknown;
+  rows?: JournalRow[];
   associateName: string;
+  associates?: JournalAssociate[];
   taxCode: unknown;
   taxedItems?: unknown[];
   defaultCurrencyAmount?: number;
-  rows?: JournalRow[];
   currencyCode: unknown;
   nr?: string;
-  associates?: JournalAssociate[];
-  startDate: string | null;
-  notifyEmail: string | null;
   recurrence: string | null;
   endDate: string | null;
   daysBefore: number | null;
   notifyType: string | null;
   notifyPersonId: number | null;
   notifyUserId: number | null;
+  startDate: string | null;
+  notifyEmail: string | null;
   debitName?: string;
   creditName?: string;
   accountId?: unknown;
@@ -481,6 +585,144 @@ export type JournalImport = {
   targetAccountClass?: string;
   currenyCode?: unknown;
   isForceSequenceNumber?: boolean;
+};
+
+export type JournalImportEntryContraAccount = {
+  id: number;
+  created: string;
+  createdBy: string;
+  lastUpdated: string;
+  lastUpdatedBy: string;
+  categoryId: number;
+  currencyId: unknown;
+  taxId: unknown;
+  attachments: unknown[];
+  allocations: unknown[];
+  number: string;
+  name: string;
+  custom: unknown;
+  notes: unknown;
+  attachmentCount: number;
+  allocationCount: number;
+  costCenterIds: unknown;
+  costCenterNumbers: unknown;
+  targetMin: unknown;
+  targetMax: unknown;
+  currencyCode: unknown;
+  fullName: string;
+  accountClass: string;
+  inactive: boolean;
+  isInactive: boolean;
+  isForeignCurrency: boolean;
+  isDefaultCurrency: boolean;
+};
+
+export type JournalImportEntryAccount = {
+  id: number;
+  created: string;
+  createdBy: string;
+  lastUpdated: string;
+  lastUpdatedBy: string;
+  categoryId: number;
+  currencyId: unknown;
+  taxId: unknown;
+  attachments: unknown[];
+  allocations: unknown[];
+  number: string;
+  name: string;
+  custom: string;
+  notes: unknown;
+  attachmentCount: number;
+  allocationCount: number;
+  costCenterIds: unknown;
+  costCenterNumbers: unknown;
+  targetMin: unknown;
+  targetMax: unknown;
+  currencyCode: unknown;
+  fullName: string;
+  accountClass: string;
+  inactive: boolean;
+  isInactive: boolean;
+  isForeignCurrency: boolean;
+  isDefaultCurrency: boolean;
+};
+
+export type JournalImportEntry = {
+  id: number;
+  created: string;
+  createdBy: string;
+  lastUpdated: string;
+  lastUpdatedBy: string;
+  importId: number;
+  journalId: unknown;
+  debitId: number;
+  guessedDebitId: unknown;
+  creditId: number;
+  guessedCreditId: number;
+  associateId: number;
+  guessedAssociateId: number;
+  taxId: number | null;
+  guessedTaxId: unknown;
+  orderId: number;
+  guessedOrderId: unknown;
+  orderStatusId: number;
+  statementId: number | null;
+  guessedStatementId: unknown;
+  statementStatusId: unknown;
+  currencyId: number | null;
+  originalCurrencyId: unknown;
+  type: string;
+  debitOrCredit: string;
+  dateAdded: string;
+  title: string;
+  guessedTitle: string;
+  custom: string | null;
+  notes: string | null;
+  reference: string;
+  guessedReference: string;
+  amount: number;
+  originalAmount: number;
+  balance: number;
+  currencyRate: number;
+  originalCurrencyRate: number;
+  taxRate: unknown;
+  confirmed: boolean;
+  imported: boolean;
+  split: boolean;
+  deleted: boolean;
+  duplicate: boolean;
+  rawText: string;
+  sourceIdHash?: string;
+  sourceMappingHashes?: string;
+  attachmentCount: unknown;
+  allocationCount: unknown;
+  costCenterIds: unknown;
+  attachments?: unknown[];
+  allocations?: unknown[];
+  costCenterNumbers: unknown;
+  remainderAmount: number;
+  remainderCurrencyId: unknown;
+  remainderCurrencyRate: number;
+  contraAccount?: JournalImportEntryContraAccount;
+  account?: JournalImportEntryAccount;
+  accountClass: string;
+  accountId?: number;
+  debitName?: string;
+  creditName?: string | null;
+  associateName?: string;
+  taxCode?: unknown;
+  categoryId?: number | null;
+  statusName?: string | null;
+  icon?: string | null;
+  currencyCode?: string;
+  categoryName?: string | null;
+  orderType?: string | null;
+  journalBalanceBefore?: unknown;
+  journalBalanceAfter?: unknown;
+  defaultCurrencyAmount?: number;
+  documentId?: string | null;
+  statusId?: number | null;
+  cls?: string;
 };
 
 export type LocationAttachment = {
@@ -549,6 +791,7 @@ export type OrderItem = {
   unitPrice: number;
   discountPercentage: number | null;
   pos: number;
+  taxCode: string;
   netUnitPrice: number;
   grossTotal: number;
   netTotal: number;
@@ -558,8 +801,7 @@ export type OrderItem = {
   defaultCurrencyNetTotal: number;
   defaultCurrencyGrossTotal: number;
   taxCalcType: string;
-  taxCode: string;
-  discountEffective: unknown;
+  discountEffective: number | null;
   discountInherited: unknown;
   optional: boolean;
   baseValue: string;
@@ -587,7 +829,7 @@ export type Order = {
   roundingId: number | null;
   fileId?: unknown;
   groupId: number;
-  previousId: number;
+  previousId: number | null;
   attachments?: unknown[];
   type: string;
   bookType: string;
@@ -616,40 +858,40 @@ export type Order = {
   allocationCount: unknown;
   costCenterIds: unknown;
   hash?: string;
-  sent: unknown;
-  sentBy: unknown;
+  sent: string | null;
+  sentBy: string | null;
   downloaded: unknown;
   downloadedBy: unknown;
   costCenterNumbers: unknown;
-  responsiblePersonName: unknown;
-  displayItemGross: boolean;
   sentStatusId: number;
   nameSingular: string;
   namePlural: string;
-  book: boolean;
-  foreignCurrency?: boolean;
   removeStock: boolean;
   addStock: boolean;
   roundingDifference?: number;
   totalToPay?: number;
-  actionId: string;
-  fileReplacement?: boolean;
+  foreignCurrency?: boolean;
+  book: boolean;
+  associateName: string;
+  responsiblePersonName: unknown;
   defaultCurrencyTotal?: number;
   due?: boolean;
-  associateName: string;
+  fileReplacement?: boolean;
+  displayItemGross: boolean;
   icon: string;
   currencyCode: unknown;
-  closed: boolean;
-  startDate: string | null;
-  notifyEmail: string | null;
-  categoryName?: string;
-  statusName: string;
+  actionId: string;
   recurrence: string | null;
   endDate: string | null;
   daysBefore: number | null;
   notifyType: string | null;
   notifyPersonId: number | null;
   notifyUserId: number | null;
+  startDate: string | null;
+  notifyEmail: string | null;
+  categoryName?: string;
+  statusName: string;
+  closed: boolean;
   paid?: number;
   isBook: boolean;
   isRemoveStock: boolean;
@@ -658,8 +900,8 @@ export type Order = {
   isDisplayItemGross: boolean;
   isFileReplacement?: boolean;
   hasDueDays: boolean;
-  isCreditNote: boolean;
   hasRecurrence?: boolean;
+  isCreditNote: boolean;
   account?: string;
   dateDue?: string | null;
   dateReceived?: string | null;
@@ -667,6 +909,57 @@ export type Order = {
   received?: boolean;
   isRecurring?: boolean;
   isReceived?: boolean;
+};
+
+export type OrderBookentryRow = {
+  fcDebit: number;
+  fcCredit: number;
+  acDebit: number;
+  acCredit: number;
+  dcDebit: number;
+  dcCredit: number;
+  fcTax: number;
+  acTax: number;
+  dcTax: number;
+  taxPercentage: unknown;
+  accountName: string;
+  accountId: number;
+  isTaxed: boolean;
+  isTax: boolean;
+};
+
+export type OrderBookentry = {
+  id: number;
+  created: string;
+  createdBy: string;
+  lastUpdated: string;
+  lastUpdatedBy: string;
+  templateId: number | null;
+  orderId: number;
+  accountId: number;
+  debitId: number;
+  creditId: number;
+  taxId: number | null;
+  currencyId: number | null;
+  importEntryId: unknown;
+  type: string;
+  date: string;
+  description: string;
+  amount: number;
+  currencyRate: number;
+  reference: string | null;
+  allocations: unknown[];
+  rows: OrderBookentryRow[];
+  costCenterNumbers: string;
+  debitName: string;
+  creditName: string;
+  original: boolean;
+  separate: boolean;
+  defaultCurrencyAmount: number;
+  netAmount: number;
+  name: string;
+  taxAmount: number;
+  isAllowTax: boolean;
 };
 
 export type OrderCategoryStatu = {
@@ -680,14 +973,31 @@ export type OrderCategoryStatu = {
   name: string;
   icon: string;
   pos: number;
-  book: boolean;
   removeStock: boolean;
   addStock: boolean;
+  book: boolean;
   closed: boolean;
   isBook: boolean;
   isRemoveStock: boolean;
   isAddStock: boolean;
   isClosed: boolean;
+};
+
+export type OrderCategoryBookTemplate = {
+  id: number;
+  created: string;
+  createdBy: string;
+  lastUpdated: string;
+  lastUpdatedBy: string;
+  categoryId: number;
+  accountId: number;
+  taxId: number | null;
+  name: string;
+  pos: number;
+  text: unknown;
+  value: unknown;
+  allowTax: boolean;
+  isAllowTax: boolean;
 };
 
 export type OrderCategory = {
@@ -699,10 +1009,10 @@ export type OrderCategory = {
   accountId: number;
   currencyId: number | null;
   status: OrderCategoryStatu[];
-  bookTemplates: unknown[];
+  bookTemplates: OrderCategoryBookTemplate[];
   sequenceNrId: number;
   layoutId: number;
-  sentStatusId: number;
+  sentStatusId: number | null;
   responsiblePersonId: string | null;
   roundingId: number | null;
   fileId: number | null;
@@ -715,24 +1025,24 @@ export type OrderCategory = {
   type: string;
   bookType: string;
   addressType: string;
-  dueDays: number;
+  dueDays: number | null;
   mailSubject: string;
   message: string;
   pos: number;
   text: unknown;
   typeName: unknown;
-  responsiblePersonName: unknown;
   displayPrices: boolean;
-  displayItemGross: boolean;
   switchRecipient: boolean;
+  responsiblePersonName: unknown;
   free: boolean;
   layoutName: string;
   defaultStatusId: number;
+  displayItemGross: boolean;
   name: string;
   value: string;
-  inactive: boolean;
-  sequenceNrIdInherited: number;
   templateId: number;
+  sequenceNrIdInherited: number;
+  inactive: boolean;
   isFree: boolean;
   isInactive: boolean;
   hasDueDays: boolean;
@@ -741,25 +1051,54 @@ export type OrderCategory = {
   isSwitchRecipient: boolean;
 };
 
+export type OrderCategoryReadStatusResult = {
+  id: number;
+  created: string;
+  createdBy: string;
+  lastUpdated: string;
+  lastUpdatedBy: string;
+  categoryId: number;
+  actionId: string;
+  name: string;
+  icon: string;
+  pos: number;
+  removeStock: boolean;
+  addStock: boolean;
+  book: boolean;
+  closed: boolean;
+  isBook: boolean;
+  isRemoveStock: boolean;
+  isAddStock: boolean;
+  isClosed: boolean;
+};
+
+export type OrderLayoutElement = {
+  id: number;
+  layoutId: number;
+  elementId: string;
+  html: string;
+  css: string;
+};
+
 export type OrderLayoutDefaultHtmlMap = {
-  TEXT_BELOW: string;
-  FOOTER: string;
-  TEXT_ABOVE: string;
-  ADDRESS_WINDOW: string;
-  ITEMS_TABLE: string;
-  HEADER: string;
-  INFO_TABLE: string;
+  FOOTER?: string;
+  ITEMS_TABLE?: string;
+  INFO_TABLE?: string;
+  ADDRESS_WINDOW?: string;
+  HEADER?: string;
+  TEXT_BELOW?: string;
+  TEXT_ABOVE?: string;
 };
 
 export type OrderLayoutDefaultCssMap = {
-  TEXT_BELOW: string;
-  FOOTER: string;
-  TEXT_ABOVE: string;
-  ADDRESS_WINDOW: string;
-  ITEMS_TABLE: string;
-  HEADER: string;
-  GENERAL: string;
-  INFO_TABLE: string;
+  FOOTER?: string;
+  ITEMS_TABLE?: string;
+  INFO_TABLE?: string;
+  ADDRESS_WINDOW?: string;
+  HEADER?: string;
+  GENERAL?: string;
+  TEXT_BELOW?: string;
+  TEXT_ABOVE?: string;
 };
 
 export type OrderLayout = {
@@ -773,18 +1112,18 @@ export type OrderLayout = {
   systemId?: string;
   name: string;
   pageSize: string;
-  elements: unknown[];
+  elements: OrderLayoutElement[];
   attachments: unknown[];
   logoHeight: number;
+  omitSameCountry: boolean;
   countryUppercase: boolean;
   countryEnglish: boolean;
-  omitSameCountry: boolean;
   displayLogo: boolean;
   defaultHtmlMap: OrderLayoutDefaultHtmlMap;
   defaultCssMap: OrderLayoutDefaultCssMap;
   system: boolean;
-  inactive: boolean;
   html: string;
+  inactive: boolean;
   css: string;
   isSystem: boolean;
   isInactive: boolean;
@@ -823,9 +1162,9 @@ export type OrderDossierResultItem = {
   percentage: unknown;
   pos: number | null;
   lastUpdatedBy: string | null;
-  highlight: boolean;
   creditNote: boolean;
   book: boolean;
+  highlight: boolean;
   isHighlight: boolean;
 };
 
@@ -874,16 +1213,31 @@ export type PersonAddress = {
   hideName: boolean;
   hideCompany: boolean;
   companyForAddress: string;
-  firstNameForAddress: string;
-  lastNameForAddress: string;
+  firstNameForAddress: string | null;
+  lastNameForAddress: string | null;
   streetName: string;
   streetNumber: string;
   titleName: string;
-  cantonCode: unknown;
+  cantonCode: string | null;
   countryCode2: string;
   countryCode3: string;
   isHideCompany: boolean;
   isHideName: boolean;
+};
+
+export type PersonInsuranceContract = {
+  id: number;
+  personId: number;
+  typeId: number;
+  contractNr: string | null;
+  subNr: string | null;
+  pos: number;
+  memberNr: unknown;
+  name: string;
+  typeName: string;
+  zip: string;
+  city: string;
+  insuranceNr: unknown;
 };
 
 export type Person = {
@@ -898,17 +1252,17 @@ export type Person = {
   bankAccounts?: unknown[];
   servicePeriods?: unknown[];
   children?: unknown[];
-  insuranceContracts?: unknown[];
+  insuranceContracts?: PersonInsuranceContract[];
   attachments?: unknown[];
-  titleId: number;
+  titleId?: number;
   nr: string;
   name: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   company: string;
   custom: string;
-  emailWork: string;
-  url: string;
+  emailWork?: string;
+  url?: string;
   address: string;
   zip: string;
   city: string;
@@ -938,6 +1292,9 @@ export type Person = {
   isFamily: boolean;
   isInactive: boolean;
   isAutoFillResponsiblePerson: boolean;
+  phoneWork?: string;
+  canton?: string;
+  cantonCode?: string;
   categoryDisplay?: string | null;
   thumbnailFileId?: number | null;
   certificateTemplateId?: number | null;
@@ -961,11 +1318,9 @@ export type Person = {
   notes?: string | null;
   emailPrivate?: string | null;
   emailInvoice?: string | null;
-  phoneWork?: string | null;
   phonePrivate?: string | null;
   mobileWork?: unknown;
   mobilePrivate?: unknown;
-  canton?: string | null;
   countryName?: string;
   superiorId?: number | null;
   superiorName?: unknown;
@@ -1016,25 +1371,132 @@ export type PersonTitle = {
   value: string;
 };
 
-export type ReportTreeResultData = {
-  id: string;
-  text: string;
-  cls: string;
-  expanded: boolean;
-  leaf: boolean;
+export type ReportCollectionElement = {
+  id: number;
+  created: string;
+  createdBy: string;
+  lastUpdated: string;
+  lastUpdatedBy: string;
   collectionId: number;
-  elementId: number;
+  fileId: unknown;
+  attachments: unknown[];
   type: string;
-  xclass: string;
-  typeName: string;
-  qtip: string;
+  name: string;
+  text: string | null;
+  pos: number;
+  config: string;
+  state: string | null;
+  columns: string | null;
+  pageBreak: boolean;
+  hideTitle: boolean;
   setId: number;
+  stateName: string;
+  isPageBreak: boolean;
+  isHideTitle: boolean;
+};
+
+export type ReportCollection = {
+  id: number;
+  created: string;
+  createdBy: string;
+  lastUpdated: string;
+  lastUpdatedBy: string;
+  elements: ReportCollectionElement[];
+  name: string;
+  text: string;
+  pos: number;
+  config: string | null;
+  annualReport: boolean;
+  dashboard: boolean;
   system: boolean;
-  pro: boolean;
-  beta: boolean;
   isSystem: boolean;
-  isPro: boolean;
+  isAnnualReport: boolean;
+  isDashboard: boolean;
+};
+
+export type ReportCollectionMetaResult = {
+  logoHeight: unknown;
+  periodLabel: string;
+  text: string;
+  title: string;
+  logoUrl: string;
+};
+
+export type ReportElement = {
+  id: number;
+  created: string;
+  createdBy: string;
+  lastUpdated: string;
+  lastUpdatedBy: string;
+  collectionId: number;
+  fileId: number | null;
+  attachments: unknown[];
+  type: string;
+  name: string;
+  text: string | null;
+  pos: number;
+  config: string;
+  state: unknown;
+  columns: string | null;
+  pageBreak: boolean;
+  hideTitle: boolean;
+  setId: number;
+  stateName: string;
+  isPageBreak: boolean;
+  isHideTitle: boolean;
+};
+
+export type ReportElementDataResult = {
+  cls?: string;
+  group?: unknown;
+  custom?: Record<string, unknown>;
+  calculations?: Record<string, unknown>;
+  id: string | number;
+  text?: string;
+  level?: number;
+  expanded?: boolean;
+  leaf?: boolean;
+  heading?: boolean;
+  accountId?: unknown;
+  openingAmount?: number;
+  dcOpeningAmount?: number;
+  previousAmount?: number;
+  dcPreviousAmount?: number;
+  endAmount?: number;
+  dcEndAmount?: number;
+  endAmount2?: number;
+  dcEndAmount2?: number;
+  changeAmount?: number;
+  dcChangeAmount?: number;
+  changePercentage?: number;
+  dcChangePercentage?: number;
+  sharePercentage?: number;
+  currencyCode?: string;
+  data?: ReportElementDataResult[];
+  displayForeignCurrency?: boolean;
+  foreignCurrency?: boolean;
+  total: boolean | number;
+  isForeignCurrency?: boolean;
+  isDisplayForeignCurrency?: boolean;
+  isTotal?: boolean;
+  name?: string;
+  tooltipTitle?: string;
+  currency?: string;
+  amount?: number;
+  percentage?: number;
+  revenue?: number;
+  expense?: number;
+  categoryId?: unknown;
+  positive?: boolean;
+};
+
+export type ReportElementMetaResult = {
+  periodLabel: string;
+  isHideTitle: boolean;
   isBeta: boolean;
+  text: string;
+  title: string;
+  isPro: boolean;
 };
 
 export type ReportTreeResult = {
@@ -1043,7 +1505,7 @@ export type ReportTreeResult = {
   cls: string;
   expanded: boolean;
   leaf: boolean;
-  data?: ReportTreeResultData[];
+  data?: ReportTreeResult[];
   collectionId: number | null;
   elementId: number | null;
   type: string | null;
@@ -1144,8 +1606,8 @@ export type SalaryCertificateTemplate = {
   orgLocationId: number | null;
   mailTemplateId: number | null;
   name: string;
-  systemId: unknown;
-  mailSubject: string;
+  systemId: string | null;
+  mailSubject: string | null;
   elementCount: number;
   default: boolean;
   system: boolean;
@@ -1163,7 +1625,7 @@ export type SalaryField = {
   fieldLabel: string;
   fieldTextRight: string;
   fieldInfo: string;
-  maxWidth: number;
+  maxWidth: number | null;
   values: string;
   dataType: string;
   pos: number;
@@ -1173,37 +1635,45 @@ export type SalaryField = {
   isInactive: boolean;
 };
 
+export type SalaryInsuranceTypeCode = {
+  id: number;
+  typeId: number;
+  name: string;
+  description: string;
+  pos: number;
+};
+
 export type SalaryInsuranceType = {
   id: number;
   created: string;
   createdBy: string;
   lastUpdated: string;
   lastUpdatedBy: string;
-  codes: unknown[];
+  codes: SalaryInsuranceTypeCode[];
   name: string;
   description: string;
   codesCsv: string;
 };
 
 export type SalaryLayoutDefaultHtmlMap = {
-  TEXT_BELOW: string;
   FOOTER: string;
+  INFO_TABLE: string;
   SALARY_TABLE: string;
-  TEXT_ABOVE: string;
   ADDRESS_WINDOW: string;
   HEADER: string;
-  INFO_TABLE: string;
+  TEXT_BELOW: string;
+  TEXT_ABOVE: string;
 };
 
 export type SalaryLayoutDefaultCssMap = {
-  TEXT_BELOW: string;
   FOOTER: string;
+  INFO_TABLE: string;
   SALARY_TABLE: string;
-  TEXT_ABOVE: string;
   ADDRESS_WINDOW: string;
   HEADER: string;
   GENERAL: string;
-  INFO_TABLE: string;
+  TEXT_BELOW: string;
+  TEXT_ABOVE: string;
 };
 
 export type SalaryLayout = {
@@ -1220,15 +1690,15 @@ export type SalaryLayout = {
   elements: unknown[];
   attachments: unknown[];
   logoHeight: number;
+  omitSameCountry: boolean;
   countryUppercase: boolean;
   countryEnglish: boolean;
-  omitSameCountry: boolean;
   displayLogo: boolean;
   defaultHtmlMap: SalaryLayoutDefaultHtmlMap;
   defaultCssMap: SalaryLayoutDefaultCssMap;
   system: boolean;
-  inactive: boolean;
   html: string;
+  inactive: boolean;
   css: string;
   isSystem: boolean;
   isInactive: boolean;
@@ -1322,16 +1792,16 @@ export type SalaryStatementType = {
   dateStart: string | null;
   dateEnd: string | null;
   onlyMonth: number | null;
-  allocationCount: number | null;
+  allocationCount: number;
   costCenterIds: unknown;
   allocations: unknown[];
-  variableNames: string;
   costCenterNumbers: string;
+  variableNames: string;
   name: string;
   number: string;
   fullName: string;
-  isSchedulable: boolean;
   hasFields: boolean;
+  isSchedulable: boolean;
   isVisible: boolean;
 };
 
@@ -1341,10 +1811,10 @@ export type SalaryStatementInsurance = {
   contractId: number;
   codeId: number | null;
   personId: number;
-  codeName: unknown;
-  codeDescription: unknown;
   contractNr: string | null;
   subNr: unknown;
+  codeName: unknown;
+  codeDescription: unknown;
   name: string;
   typeName: string;
   zip: string;
@@ -1401,34 +1871,34 @@ export type SalaryStatement = {
   grossSalary: number;
   netSalary: number;
   payment: number;
-  open: number;
+  open: unknown;
   canton: string;
   notes: string | null;
   attachmentCount: number;
   custom: string;
-  hash?: string;
+  hash?: unknown;
   sent: unknown;
   sentBy: unknown;
   downloaded: unknown;
   downloadedBy: unknown;
-  book: boolean;
-  personName: string;
   valuesInherited?: string;
   visibleItems?: SalaryStatementVisibleItem[];
+  personName: string;
+  book: boolean;
   icon: string;
   language?: string;
   currencyCode: unknown;
-  closed: boolean;
-  startDate: string;
-  notifyEmail: string;
-  statusName: string;
+  accountId: number;
   recurrence: string;
   endDate: string | null;
   daysBefore: number | null;
   notifyType: string | null;
   notifyPersonId: number | null;
   notifyUserId: number | null;
-  accountId: number;
+  startDate: string;
+  notifyEmail: string;
+  statusName: string;
+  closed: boolean;
   paid?: number;
   isBook: boolean;
   isClosed: boolean;
@@ -1486,27 +1956,27 @@ export type SalaryTemplateType = {
   allocationCount: unknown;
   costCenterIds: unknown;
   allocations: unknown[];
-  rowNameInherited: string;
+  costCenterNumbers: string;
   rowNameEffective: string;
   descriptionEffective: unknown;
   debitIdEffective: number;
   creditIdEffective: number;
   allocationsEffective: unknown[];
   variableNames: string;
+  rowNameInherited: string;
   preConfig: boolean;
   inherited: boolean;
   debitIdInherited: number;
   creditIdInherited: number;
   descriptionInherited: unknown;
   allocationsInherited: unknown[];
-  costCenterNumbers: string;
   name: string;
   number: string;
   fullName: string;
   isPreConfig: boolean;
   isInherited: boolean;
-  isSchedulable: boolean;
   hasFields: boolean;
+  isSchedulable: boolean;
   isVisible: boolean;
 };
 
@@ -1516,10 +1986,65 @@ export type SalaryTemplateInsurance = {
   contractId: number;
   codeId: unknown;
   personId: number;
-  codeName: unknown;
-  codeDescription: unknown;
   contractNr: string | null;
   subNr: unknown;
+  codeName: unknown;
+  codeDescription: unknown;
+  inherited: boolean;
+  name: string;
+  typeName: string;
+  zip: string;
+  city: string;
+  typeId: number;
+  isInherited: boolean;
+};
+
+export type SalaryTemplateTypesInherited = {
+  id: unknown;
+  typeId: number;
+  templateId: number;
+  debitId: unknown;
+  creditId: unknown;
+  rowName: unknown;
+  description: unknown;
+  onlyMonth: number | null;
+  allocationCount: unknown;
+  costCenterIds: unknown;
+  allocations: unknown[];
+  costCenterNumbers: string;
+  rowNameEffective: string;
+  descriptionEffective: unknown;
+  debitIdEffective: number;
+  creditIdEffective: number;
+  allocationsEffective: unknown[];
+  variableNames: string;
+  rowNameInherited: string;
+  preConfig: boolean;
+  inherited: boolean;
+  debitIdInherited: number;
+  creditIdInherited: number;
+  descriptionInherited: unknown;
+  allocationsInherited: unknown[];
+  name: string;
+  number: string;
+  fullName: string;
+  isPreConfig: boolean;
+  isInherited: boolean;
+  hasFields: boolean;
+  isSchedulable: boolean;
+  isVisible: boolean;
+};
+
+export type SalaryTemplateInsurancesInherited = {
+  id: unknown;
+  templateId: number;
+  contractId: number;
+  codeId: unknown;
+  personId: number;
+  contractNr: string | null;
+  subNr: unknown;
+  codeName: unknown;
+  codeDescription: unknown;
   inherited: boolean;
   name: string;
   typeName: string;
@@ -1530,51 +2055,51 @@ export type SalaryTemplateInsurance = {
 };
 
 export type SalaryTemplateTypesEffective = {
-  id: number;
+  id: number | null;
   typeId: number;
   templateId: number;
   debitId: unknown;
   creditId: unknown;
   rowName: unknown;
   description: unknown;
-  onlyMonth: unknown;
+  onlyMonth: number | null;
   allocationCount: unknown;
   costCenterIds: unknown;
   allocations: unknown[];
-  rowNameInherited: string;
+  costCenterNumbers: string;
   rowNameEffective: string;
   descriptionEffective: unknown;
   debitIdEffective: number;
   creditIdEffective: number;
   allocationsEffective: unknown[];
   variableNames: string;
+  rowNameInherited: string;
   preConfig: boolean;
   inherited: boolean;
   debitIdInherited: number;
   creditIdInherited: number;
   descriptionInherited: unknown;
   allocationsInherited: unknown[];
-  costCenterNumbers: string;
   name: string;
   number: string;
   fullName: string;
   isPreConfig: boolean;
   isInherited: boolean;
-  isSchedulable: boolean;
   hasFields: boolean;
+  isSchedulable: boolean;
   isVisible: boolean;
 };
 
 export type SalaryTemplateInsurancesEffective = {
-  id: number;
+  id: number | null;
   templateId: number;
   contractId: number;
   codeId: unknown;
   personId: number;
-  codeName: unknown;
-  codeDescription: unknown;
   contractNr: string | null;
   subNr: unknown;
+  codeName: unknown;
+  codeDescription: unknown;
   inherited: boolean;
   name: string;
   typeName: string;
@@ -1592,33 +2117,33 @@ export type SalaryTemplate = {
   lastUpdatedBy: string;
   parentId: number | null;
   currencyId: number | null;
-  layoutId: number;
+  layoutId: number | null;
   orgLocationId: number | null;
   headerTemplateId: number | null;
   footerTemplateId: number | null;
   mailTemplateId: number | null;
-  sequenceNrId: number;
+  sequenceNrId: number | null;
   types: SalaryTemplateType[];
   insurances: SalaryTemplateInsurance[];
   name: string;
   valuesLocal: string;
-  mailSubject: string;
-  message: string;
+  mailSubject: string | null;
+  message: string | null;
   notes: unknown;
-  dayOfMonth: number;
-  paymentDayOfMonth: number;
+  dayOfMonth: number | null;
+  paymentDayOfMonth: number | null;
   valuesEffective: string;
-  valuesInherited: unknown;
-  typesInherited: unknown[];
-  insurancesInherited: unknown[];
+  valuesInherited: string | null;
+  typesInherited: SalaryTemplateTypesInherited[];
+  insurancesInherited: SalaryTemplateInsurancesInherited[];
   typeCount: number;
   typesEffective: SalaryTemplateTypesEffective[];
   insurancesEffective: SalaryTemplateInsurancesEffective[];
-  layoutIdInherited: unknown;
+  layoutIdInherited: number | null;
   default: boolean;
   system: boolean;
-  inactive: boolean;
   sequenceNrIdInherited: number;
+  inactive: boolean;
   isDefault: boolean;
   isSystem: boolean;
   isInactive: boolean;
@@ -1642,6 +2167,23 @@ export type SalaryTypeField = {
   isInactive: boolean;
 };
 
+export type SalaryTypePreCalculationSum = {
+  id: number;
+  preCalculationId: number;
+  sumId: number;
+};
+
+export type SalaryTypePreCalculation = {
+  id: number;
+  typeId: number;
+  variableId: number;
+  sums: SalaryTypePreCalculationSum[];
+  name: string;
+  calculation: string;
+  pos: number;
+  variableName: string;
+};
+
 export type SalaryTypeSum = {
   id: number;
   typeId: number;
@@ -1660,7 +2202,7 @@ export type SalaryType = {
   insuranceTypeId: number | null;
   variableId: number;
   fields?: SalaryTypeField[];
-  preCalculations?: unknown[];
+  preCalculations?: SalaryTypePreCalculation[];
   sums?: SalaryTypeSum[];
   allocations?: unknown[];
   number: string;
@@ -1670,20 +2212,20 @@ export type SalaryType = {
   type: string;
   base: string;
   quantity: string;
-  rate: string;
+  rate: string | null;
   calculation: string;
   certificateCode: string;
   notes: string | null;
   allocationCount: number;
   costCenterIds: unknown;
   costCenterNumbers: unknown;
-  schedulable: boolean;
   rowNameEffective: string;
   descriptionEffective: unknown;
   debitIdEffective: number;
   creditIdEffective: unknown;
   allocationsEffective?: unknown[];
   variableNames?: string;
+  schedulable: boolean;
   visible: boolean;
   inactive: boolean;
   variableName: string;
@@ -1793,11 +2335,11 @@ export type Tax = {
   description: string;
   documentName: string;
   accountDisplay: string;
-  displayTaxRate: boolean;
   formCodes: string;
   currentPercentage: number;
   currentPercentageFlat: unknown;
   inactive: boolean;
+  displayTaxRate: boolean;
   isDisplayTaxRate: boolean;
   isInactive: boolean;
   isFlat: boolean;

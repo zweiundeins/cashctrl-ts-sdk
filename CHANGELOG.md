@@ -10,6 +10,47 @@ in minor releases as response inference improves.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-04
+
+Better inferred types, from probing more of the API and merging what it finds
+more carefully. No breaking changes to the request surface; response types on
+several endpoints become more specific, which can surface existing mistakes at
+compile time.
+
+### Added
+
+- The prober reaches endpoints whose mandatory parameter the sibling-list
+  convention cannot supply, via a `FIXTURES` table and several passes so
+  chains resolve. 13 endpoints gained real types, among them
+  `customfield/list`, `journal/import/entry/list`, `order/bookentry/list`,
+  `order/category/read_status` and `report/element/data`. Coverage went from
+  95 to 108 of 376.
+- Up to three records are sampled per endpoint instead of one, so a field that
+  is null on the first record can still be typed from the third.
+- A mandatory parameter with documented values is probed once per value.
+- Period-dependent endpoints are probed once per fiscal period.
+
+### Fixed
+
+- `mergeForEntity` only preferred the known side when the *whole* shape was
+  unknown, so an array that was empty in `read.json` beat the same array
+  populated in `list.json`. It recurses now: `openMonthIds` is `string[]`
+  rather than `unknown[]`, and `bookTemplates` is a typed object array rather
+  than `unknown[]`.
+- Tree types stopped at whatever depth the sample happened to reach, emitting
+  `XData`, `XDataData` and so on. Where a nested array's element type is
+  structurally its parent, it is folded into a self-reference:
+  `ReportTreeResult.data` and `ReportElementDataResult.data` are recursive now.
+- `report/element/data.json` was typed as returning the resource's entity
+  (`ReportElement[]`) because any array response was assumed to be a list of
+  the resource. It returns report *rows*, not report element definitions, and
+  now has its own type.
+- A failed probe no longer replaces a good shape with `unknown`. The weekly
+  job is unattended, and a transient upstream 500 silently downgrading the
+  generated types is worse than leaving them stale.
+- Order and salary document reads are denied to the prober: fetching one
+  appends a `DOWNLOAD` entry to the organisation's history log.
+
 ## [0.3.0] - 2026-09-04
 
 **Upgrade from 0.2.0.** Four methods change their return type from
@@ -157,7 +198,8 @@ response envelope.
   Response types are inferred from one organisation's live data across 95 of
   376 endpoints, so they are best-effort. See the README's Caveats section.
 
-[Unreleased]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/releases/tag/v0.1.0

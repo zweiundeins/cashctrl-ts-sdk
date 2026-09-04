@@ -126,10 +126,61 @@ function paramsInterface(
 const entityDecls = new Map<string, string>();
 
 /** Renders a probed shape as a TypeScript type, hoisting nested objects. */
-function shapeTsType(shape: Shape, nameHint: string): string {
+/**
+ * Tree endpoints return nodes containing more nodes, but a sample only reaches
+ * as deep as the data happened to go, so inference mints `XData`, `XDataData`
+ * and then stops — a type that is wrong for any deeper tree. Where a nested
+ * array's element type is structurally the parent (its fields are a subset,
+ * because the leaf simply had no children), fold it back in and make the field
+ * genuinely recursive.
+ */
+function foldSelfReferences(shape: Shape, name: string): Shape {
+  if (shape.kind !== "object") return shape;
+  const parentFields = new Set(Object.keys(shape.fields));
+  let merged: Shape = shape;
+  const rewritten: Record<string, { shape: Shape; optional: boolean }> = {};
+  let folded = false;
+
+  for (const [field, entry] of Object.entries(shape.fields)) {
+    const items = entry.shape.kind === "array" ? entry.shape.items : undefined;
+    const childFields = items?.kind === "object"
+      ? Object.keys(items.fields)
+      : undefined;
+    // Three fields is enough to distinguish a truncated node from an unrelated
+    // little object that happens to share a key or two with its parent.
+    if (
+      childFields && childFields.length >= 3 &&
+      childFields.every((f) => parentFields.has(f))
+    ) {
+      merged = mergeForEntity(merged, items!);
+      rewritten[field] = {
+        shape: { kind: "array", items: { kind: "self" } },
+        optional: entry.optional,
+      };
+      folded = true;
+      console.log(`  recursive: ${name}.${field} -> ${name}[]`);
+    } else {
+      rewritten[field] = entry;
+    }
+  }
+  if (!folded) return shape;
+
+  // Keep the merged-in fields, but with the recursive ones rewritten.
+  const fields = { ...(merged as { fields: typeof rewritten }).fields };
+  for (const [field, entry] of Object.entries(rewritten)) fields[field] = entry;
+  return { kind: "object", fields };
+}
+
+function shapeTsType(
+  shape: Shape,
+  nameHint: string,
+  selfName?: string,
+): string {
   switch (shape.kind) {
     case "unknown":
       return "unknown";
+    case "self":
+      return selfName ?? "unknown";
     case "scalar": {
       const types = shape.types.length ? shape.types : ["unknown"];
       // A field that was null in every sample and has no documented param to
@@ -143,14 +194,18 @@ function shapeTsType(shape: Shape, nameHint: string): string {
       return ordered.join(" | ");
     }
     case "array":
-      return `${shapeTsType(shape.items, singular(nameHint))}[]`;
+      return `${shapeTsType(shape.items, singular(nameHint), selfName)}[]`;
     case "object": {
-      const entries = Object.entries(shape.fields);
+      const folded = foldSelfReferences(shape, nameHint) as Extract<
+        Shape,
+        { kind: "object" }
+      >;
+      const entries = Object.entries(folded.fields);
       if (!entries.length) return "Record<string, unknown>";
       const body = entries.map(([field, { shape: s, optional }]) => {
         const hint = nameHint + pascal(field);
         return `  ${key(field)}${optional ? "?" : ""}: ${
-          shapeTsType(s, hint)
+          shapeTsType(s, hint, nameHint)
         };`;
       }).join("\n");
       declareEntity(nameHint, body);
@@ -269,6 +324,16 @@ function writableParams(endpoints: Endpoint[]): Map<string, Param> {
 }
 
 function mergeForEntity(a: Shape, b: Shape): Shape {
+  if (a.kind === "unknown") return b;
+  if (b.kind === "unknown") return a;
+
+  // Recurse into arrays: an array that was empty in one sample is
+  // `unknown[]`, which is not itself `unknown`, so a shallow check would let
+  // it win over the sample that actually had elements.
+  if (a.kind === "array" && b.kind === "array") {
+    return { kind: "array", items: mergeForEntity(a.items, b.items) };
+  }
+
   if (a.kind !== "object" || b.kind !== "object") return a;
   const fields: Record<string, { shape: Shape; optional: boolean }> = {};
   for (
@@ -278,7 +343,7 @@ function mergeForEntity(a: Shape, b: Shape): Shape {
     const fb = b.fields[k];
     if (fa && fb) {
       fields[k] = {
-        shape: fa.shape.kind === "unknown" ? fb.shape : fa.shape,
+        shape: mergeForEntity(fa.shape, fb.shape),
         optional: fa.optional || fb.optional,
       };
     } else {
@@ -408,7 +473,12 @@ function returnType(endpoint: Endpoint, entity: string | undefined): string {
   if (probe && !probe.error) {
     if (probe.shape.kind === "array") {
       const items = probe.shape.items;
-      if (items.kind === "object" && entity) return `${entity}[]`;
+      // Only `list` and `read` return the resource's own entity. Other verbs
+      // that happen to return an array return something else entirely —
+      // `report/element/data.json` returns report *rows*, not report elements.
+      if (items.kind === "object" && entity && verb === "list.json") {
+        return `${entity}[]`;
+      }
       return `${shapeTsType(items, entityNameFor(endpoint))}[]`;
     }
     if (probe.shape.kind === "object") {
@@ -704,6 +774,10 @@ function shapeToJsonSchema(shape: Shape): Record<string, unknown> {
   switch (shape.kind) {
     case "unknown":
       return {};
+    // Only the TypeScript emitter folds recursion; response schemas here are
+    // inlined per endpoint with no components to $ref back to.
+    case "self":
+      return { type: "object" };
     case "scalar": {
       const nonNull = shape.types.filter((t) => t !== "null");
       const types = shape.types.includes("null")
