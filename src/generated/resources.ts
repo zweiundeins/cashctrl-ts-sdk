@@ -993,8 +993,8 @@ export class DomainCurrentResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/domain/current/logo
    */
-  logo(params?: Record<string, never>, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/domain/current/logo", undefined, signal);
+  logo(params?: Record<string, never>, signal?: AbortSignal): Promise<Response> {
+    return this.#http.raw("GET", "/api/v1/domain/current/logo", undefined, signal);
   }
 }
 
@@ -1158,8 +1158,8 @@ export class FileResource {
    * `GET /api/v1/file/get`
    * @see https://app.cashctrl.com/static/help/en/api/index.html#/file/get
    */
-  get(params: M.FileGetParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/file/get", params, signal);
+  get(params: M.FileGetParams, signal?: AbortSignal): Promise<Response> {
+    return this.#http.raw("GET", "/api/v1/file/get", params, signal);
   }
 
   /**
@@ -3030,8 +3030,8 @@ export class OrderPaymentResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/order/payment/download
    */
-  download(params: M.OrderPaymentDownloadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/order/payment/download", params, signal);
+  download(params: M.OrderPaymentDownloadParams, signal?: AbortSignal): Promise<Response> {
+    return this.#http.raw("GET", "/api/v1/order/payment/download", params, signal);
   }
 }
 
@@ -4833,8 +4833,8 @@ export class SalaryPaymentResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/salary/payment/download
    */
-  download(params: M.SalaryPaymentDownloadParams, signal?: AbortSignal): Promise<unknown> {
-    return this.#http.get<unknown>("/api/v1/salary/payment/download", params, signal);
+  download(params: M.SalaryPaymentDownloadParams, signal?: AbortSignal): Promise<Response> {
+    return this.#http.raw("GET", "/api/v1/salary/payment/download", params, signal);
   }
 }
 

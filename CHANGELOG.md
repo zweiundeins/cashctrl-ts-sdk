@@ -10,6 +10,40 @@ in minor releases as response inference improves.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-04
+
+**Upgrade from 0.2.0.** Four methods change their return type from
+`Promise<unknown>` to `Promise<Response>`: `file.get()`,
+`domain.current.logo()`, `order.payment.download()` and
+`salary.payment.download()`. Nothing was calling them successfully — they
+parsed their file body as JSON and threw — so there is no working code to
+migrate. Await `.arrayBuffer()` or `.text()` on the result, as with the other
+document endpoints.
+
+### Fixed
+
+- Four endpoints that return a file had no format suffix to give them away, so
+  they were generated as JSON calls: `file.get()`, `domain.current.logo()`,
+  `order.payment.download()` and `salary.payment.download()` tried to
+  `JSON.parse` a PDF and threw. They now return a raw `Response` like every
+  other document endpoint. **Breaking** for anyone calling them, though there
+  was no working call to break.
+- `spec/openapi.json` declared `application/json` for all 376 responses,
+  including the 59 that return a file. Those now carry their real media type
+  (`application/pdf`, `text/csv`, `application/octet-stream`, ...) and a
+  `{type: string, format: binary}` schema, so generators and API clients built
+  from the spec stop expecting JSON.
+
+### Added
+
+- `SIDE_EFFECTING_GETS` and `isSideEffectingGet()`, the two GET endpoints that
+  mutate state (`fiscalperiod/reopen_months.json` reopens closed months,
+  `sequencenumber/get` consumes a number). Previously this list lived inside
+  the probe script; it is exported now because any read-only consumer needs it.
+- `spec/index.json` and `deno task index`: the whole API surface without
+  response schemas, 450 KB instead of 1.9 MB, for tools that have to search all
+  376 endpoints rather than call one.
+
 ## [0.2.0] - 2026-07-27
 
 **Upgrade from 0.1.0.** Every `delete` method in 0.1.0 was named `delete_` and
@@ -123,6 +157,7 @@ response envelope.
   Response types are inferred from one organisation's live data across 95 of
   376 endpoints, so they are best-effort. See the README's Caveats section.
 
-[Unreleased]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/releases/tag/v0.1.0

@@ -343,13 +343,47 @@ function envelopeKind(endpoint: Endpoint): "array" | "object" | null {
   return null;
 }
 
+/**
+ * Media types for endpoints that hand back a file instead of JSON.
+ *
+ * Most are recognisable by their format suffix, but four are not: they have no
+ * suffix at all and used to be generated as JSON calls, which meant
+ * `file.get()` tried to `JSON.parse` a PDF.
+ */
+const BINARY_SUFFIXES: Record<string, string> = {
+  pdf: "application/pdf",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  csv: "text/csv",
+  zip: "application/zip",
+  vcf: "text/vcard",
+  xml: "application/xml",
+  html: "text/html",
+};
+
+const BINARY_PATHS: Record<string, string> = {
+  // Redirects to object storage; the body is whatever was uploaded.
+  "/api/v1/file/get": "application/octet-stream",
+  "/api/v1/domain/current/logo": "application/octet-stream",
+  // pain.001 XML or PDF, depending on the parameters passed to `create`.
+  "/api/v1/order/payment/download": "application/octet-stream",
+  "/api/v1/salary/payment/download": "application/octet-stream",
+};
+
+/** The media type an endpoint responds with, or `null` when it returns JSON. */
+function binaryMediaType(endpoint: Endpoint): string | null {
+  const direct = BINARY_PATHS[endpoint.path];
+  if (direct) return direct;
+  const suffix = /\.([a-z]+)$/.exec(splitPath(endpoint.path).verb)?.[1];
+  return suffix ? BINARY_SUFFIXES[suffix] ?? null : null;
+}
+
 /** Return type for one endpoint, based on the API's conventions and probing. */
 function returnType(endpoint: Endpoint, entity: string | undefined): string {
   const verb = splitPath(endpoint.path).verb;
   const probe = probed.responses[endpoint.path];
 
   // Binary/document endpoints are returned as a Response for streaming.
-  if (/\.(pdf|xlsx|zip|csv|vcf|xml|html)$/.test(verb)) return "Response";
+  if (binaryMediaType(endpoint)) return "Response";
 
   if (endpoint.method === "POST") return "WriteEnvelope";
 
@@ -721,6 +755,7 @@ for (const endpoint of spec.endpoints) {
   // Include the format suffix, or `list.json`/`list.csv`/`list.pdf` would all
   // collapse onto the same operationId.
   const { resource, verb } = splitPath(endpoint.path);
+  const mediaType = binaryMediaType(endpoint);
   const operation: Record<string, unknown> = {
     operationId: camel(resource.join("-")) + pascal(methodName(verb)),
     summary: endpoint.summary,
@@ -728,11 +763,18 @@ for (const endpoint of spec.endpoints) {
     tags: [endpoint.group[0] ?? "General"],
     externalDocs: { url: `${spec.source}#${endpoint.anchor}` },
     responses: {
-      "200": {
-        description:
-          "Success. Note that write endpoints return 200 even when validation fails; check `success`.",
-        content: { "application/json": { schema: responseSchema(endpoint) } },
-      },
+      "200": mediaType
+        ? {
+          description: "Success. Returns a file, not JSON.",
+          content: {
+            [mediaType]: { schema: { type: "string", format: "binary" } },
+          },
+        }
+        : {
+          description:
+            "Success. Note that write endpoints return 200 even when validation fails; check `success`.",
+          content: { "application/json": { schema: responseSchema(endpoint) } },
+        },
       "401": { $ref: "#/components/responses/Unauthorized" },
       "403": { $ref: "#/components/responses/Forbidden" },
       "429": { $ref: "#/components/responses/RateLimited" },
