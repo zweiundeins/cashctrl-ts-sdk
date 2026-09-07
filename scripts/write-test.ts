@@ -15,7 +15,8 @@
  * "all write paths are tested" is a measured number rather than a claim.
  *
  * Run: deno task write-test --dry-run          (offline, coverage only)
- *      deno task write-test --org=<organisation>
+ *      deno task write-test --org=<organisation>          (skips year-end)
+ *      deno task write-test --org=<organisation> --all    (everything)
  *      deno task write-test --org=<organisation> --only=orders,journal
  *      deno task write-test --org=<organisation> --mail=you@example.com
  */
@@ -58,6 +59,9 @@ const ctx = new Ctx(cc, tag, args, transport);
 
 const only = args.find((a) => a.startsWith("--only="))
   ?.slice("--only=".length).split(",").filter(Boolean);
+// `--only=yearend` runs that suite alone, which is the wrong tool for "run
+// everything including the ones that leave a mark".
+const all = args.includes("--all");
 
 console.log(
   dryRun
@@ -71,7 +75,9 @@ console.log("discovering organisation");
 ctx.world = await discover(ctx);
 console.log();
 
-const selected = suites.filter((s) => only ? only.includes(s.name) : !s.optIn);
+const selected = suites.filter((s) =>
+  only ? only.includes(s.name) : all || !s.optIn
+);
 const skipped = suites.filter((s) => !selected.includes(s));
 
 for (const suite of selected) {
@@ -101,7 +107,15 @@ console.log(
 );
 
 if (skipped.length) {
+  const optedOut = skipped.filter((s) => s.optIn && !only);
   console.log(`suites not run: ${skipped.map((s) => s.name).join(", ")}`);
+  if (optedOut.length) {
+    console.log(
+      `  ${
+        optedOut.map((s) => s.name).join(", ")
+      } is opt-in because it leaves records behind; add --all to include it`,
+    );
+  }
 }
 
 if (missed.length) {

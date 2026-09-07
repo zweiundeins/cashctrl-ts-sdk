@@ -92,7 +92,11 @@ export function recordingFetch(
 
 export interface Suite {
   name: string;
-  /** Skipped unless explicitly selected; for suites that leave a mark. */
+  /**
+   * Skipped unless `--all` or `--only` names it. For suites that leave a
+   * permanent mark on the organisation, so a routine run does not accumulate
+   * one every time.
+   */
   optIn?: boolean;
   run(ctx: Ctx): Promise<void>;
 }

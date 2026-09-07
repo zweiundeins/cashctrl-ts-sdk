@@ -333,18 +333,24 @@ line:
 
 ```sh
 deno task write-test --dry-run                    # offline, coverage only
-deno task write-test --org=<organisation>          # the real thing
+deno task write-test --org=<organisation>          # the real thing, 183/192
+deno task write-test --org=<org> --all             # plus year-end, 192/192
 deno task write-test --org=<org> --only=orders     # one suite while iterating
 deno task write-test --org=<org> --mail=me@example.com   # include the 3 mail endpoints
 ```
+
+`yearend` is opt-in, behind `--all`. Completing a fiscal period makes it
+permanently undeletable — reopening does not undo that — so every run of that
+suite leaves one behind. Worth doing deliberately, wasteful by default.
 
 Every call goes through the generated method rather than raw HTTP, and a
 recording `fetch` collects the paths actually reached, so the run ends with a
 coverage report measured against every POST in `spec/api.json` instead of a
 claim. Each suite tears down what it created, last created first.
 
-Last full run against a disposable organisation: **266 assertions passed, 2
-failed, 192/192 endpoints reached**. The two failures are server-side, see
+Last full run against a disposable organisation (`--all --mail=...`): **266
+assertions passed, 2 failed, 192/192 endpoints reached**. A default run skips
+the year-end suite and reaches 183/192. The two failures are server-side, see
 below.
 
 The three `mail` endpoints send real e-mail, so they are skipped unless `--mail`
@@ -359,11 +365,11 @@ before the earliest existing one, so it never touches the year anybody is
 booking into - completes it, reopens it and then deletes it.
 
 That last step does not always work: **a fiscal period that has been completed
-can never be deleted again**, reopening included, so every full run leaves one
-extra fiscal period behind. It is renamed `<tag>-DELETE-ME` on the way out. The
-same is true of a depreciated fixed asset and of a salary template a statement
-has used. All three are reported at the end under "left behind" so they are
-never mistaken for a leak.
+can never be deleted again**, reopening included, so every run of `yearend`
+leaves one extra fiscal period behind, renamed `<tag>-DELETE-ME` on the way out.
+That is why the suite is opt-in. The same is true of a depreciated fixed asset
+and of a salary template a statement has used. All three are reported at the end
+under "left behind" so they are never mistaken for a leak.
 
 #### What the write paths actually revealed
 

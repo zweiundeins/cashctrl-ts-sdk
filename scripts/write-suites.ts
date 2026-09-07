@@ -1838,6 +1838,10 @@ const settings: Suite = {
  */
 const yearend: Suite = {
   name: "yearend",
+  // Opt-in: completing a fiscal period makes it undeletable for good, so
+  // every run of this suite leaves one behind. Fine deliberately, wasteful
+  // by default.
+  optIn: true,
   async run(ctx) {
     const cc = ctx.cc;
     const t = ctx.tag;
