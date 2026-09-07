@@ -401,10 +401,13 @@ parameters, which generated `Record<string, never>` — a signature that cannot
 express any request. It accepts the same keys `setting/read` returns, so it is
 now typed openly and the suite round-trips a real setting.
 
-**Fixed: four parameters documented as TEXT that are really JSON arrays** —
-`tax.components`, `tax.rates`, `person.addresses`, `person.bankAccounts`. The
-serializer already JSON-encodes an array of objects, so these now accept one
-directly; the string form still works for callers who encoded it themselves.
+**Fixed: four parameters typed TEXT whose value must be a JSON array** —
+`tax.components`, `tax.rates`, `person.addresses`, `person.bankAccounts`. A
+string you encoded yourself was always accepted, so this is ergonomics rather
+than a correction: all four now take the array directly and the serializer
+encodes it. Worth knowing anyway, because `tax`'s two document no format at all
+— the value is an array of objects whose fields appear only in the `read.json`
+response.
 
 **Still yours to work around: parameters documented as optional that the server
 requires.** Not fixed, deliberately: several of them are only mandatory when the

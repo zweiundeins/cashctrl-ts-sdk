@@ -42,23 +42,24 @@ export const TYPE_OVERRIDES: TypeOverride[] = [
     tsType: "string | number",
     reason: "Same as order/create.json.",
   },
-  // Four params CashCtrl documents as TEXT that are really JSON arrays. The
-  // serializer already JSON-encodes an array of objects, so accepting one
-  // here is enough to make them usable; the string form stays for callers
-  // who have already encoded it themselves.
+  // Four params CashCtrl types as TEXT whose value must be a JSON array. A
+  // string the caller JSON-encoded is accepted, so these are usable today -
+  // the type simply gives no hint that encoding is required. Widened to take
+  // the array directly, which the serializer already encodes.
   {
     path: "/api/v1/tax/create.json",
     param: "components",
     tsType: "string | readonly Record<string, unknown>[]",
-    reason:
-      "Documented as TEXT with no format given. tax/read.json returns it " +
-      "as an array of objects ({ accountId, code, calcType, applyRule, " +
-      "pos, isInputTax }), and create only succeeds when given the same " +
-      "JSON; passing the documented string produces a 500. Verified " +
-      "against a live organisation on 2026-09-07. Left as " +
-      "Record<string, unknown> rather than the observed shape: the " +
-      "component fields are not documented anywhere, so pinning them would " +
-      "be inference dressed up as specification.",
+    reason: "Documented as TEXT with no format given at all. tax/read.json " +
+      "returns it as an array of objects ({ accountId, code, calcType, " +
+      "applyRule, pos, isInputTax }), and the value must be that array " +
+      "JSON-encoded - any other string is a 500. A JSON string a caller " +
+      "encoded themselves is accepted, so this widening is ergonomic " +
+      "rather than corrective: it removes a JSON.stringify the type gave " +
+      "no hint was needed. Verified against a live organisation on " +
+      "2026-09-07. Left as Record<string, unknown> rather than the " +
+      "observed shape: the component fields are not documented anywhere, " +
+      "so pinning them would be inference dressed up as specification.",
   },
   {
     path: "/api/v1/tax/update.json",
