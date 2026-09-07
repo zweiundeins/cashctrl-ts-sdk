@@ -32,6 +32,14 @@ const ACCOUNTS = [
   categoryId: 1,
 }));
 
+function tryParse(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
 function json(body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status: 200,
@@ -137,9 +145,15 @@ function readGet(path: string, params: URLSearchParams): unknown {
   }
 
   if (path.endsWith("/read.json")) {
-    // Echo the request back, so `crud`'s read-back assertions can pass.
+    // Echo the request back, so `crud`'s read-back assertions can pass. JSON
+    // params go out as encoded strings and come back parsed, the way the real
+    // API returns them - otherwise a suite that reads a structured field back
+    // sees a string and fails for a reason the server never would.
     const record: Record<string, unknown> = { id: Number(params.get("id")) };
-    for (const [key, value] of params) if (key !== "id") record[key] = value;
+    for (const [key, value] of params) {
+      if (key === "id") continue;
+      record[key] = /^[[{]/.test(value) ? tryParse(value) : value;
+    }
     return { data: record };
   }
   return { data: [] };

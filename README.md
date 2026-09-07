@@ -401,13 +401,20 @@ parameters, which generated `Record<string, never>` — a signature that cannot
 express any request. It accepts the same keys `setting/read` returns, so it is
 now typed openly and the suite round-trips a real setting.
 
-**Fixed: four parameters typed TEXT whose value must be a JSON array** —
-`tax.components`, `tax.rates`, `person.addresses`, `person.bankAccounts`. A
-string you encoded yourself was always accepted, so this is ergonomics rather
-than a correction: all four now take the array directly and the serializer
-encodes it. Worth knowing anyway, because `tax`'s two document no format at all
-— the value is an array of objects whose fields appear only in the `read.json`
-response.
+**Fixed: 19 structured parameters generated as `string`.** CashCtrl documents a
+structured parameter by giving it a nested parameter table, which the scraper
+records as `fields`. For 19 params it also labels the type `TEXT`, and the
+generator — reading the label, not the table — emitted `string` and discarded
+the shape. `person.addresses` was typed `string` despite having eleven
+documented fields.
+
+A sub-table is the statement that a value is structured; there is nothing else
+it could mean, and CashCtrl types the other 116 such params `JSON` itself. So
+this is one rule rather than 19 entries, and it costs nothing once upstream
+fixes a label. `person.addresses`, `bankAccounts`, `contacts`, `children`,
+`servicePeriods`, `insuranceContracts`, `salary/insurance/type.codes`,
+`tax.components` and `tax.rates` are now object arrays with their documented
+fields and enums, not opaque strings.
 
 **Still yours to work around: parameters documented as optional that the server
 requires.** Not fixed, deliberately: several of them are only mandatory when the
@@ -419,8 +426,9 @@ type would break the callers for whom they are genuinely optional.
 `order/bookentry/update` and `salary/bookentry/create`; `nr` on
 `inventory/article/create`, `order/create` and `salary/statement/create`; `nr`
 and `purchaseCreditId` on `inventory/asset/create`; `mailTo` on all three `mail`
-endpoints; and all four date fields on `fiscalperiod/update`, whose only
-documented requirement is `id`.
+endpoints; `code` inside each entry of `tax.components`, without which the whole
+array is discarded as "At least one component must be set"; and all four date
+fields on `fiscalperiod/update`, whose only documented requirement is `id`.
 
 **Server-side faults**, reported as failures rather than worked around:
 

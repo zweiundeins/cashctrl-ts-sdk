@@ -30,7 +30,7 @@ import {
   splitPath,
   typeName,
 } from "./naming.ts";
-import { applyParamAdditions, findOverride, openParams } from "./overrides.ts";
+import { applySpecCorrections, findOverride, openParams } from "./overrides.ts";
 
 const root = (p: string) => new URL(`../${p}`, import.meta.url);
 
@@ -44,10 +44,10 @@ try {
 
 /* ------------------------------------------------------- request params -- */
 
-// Parameters the API requires but the reference omits entirely, folded in
-// before anything reads them, so the params interface and the OpenAPI
-// document agree with what the server actually wants.
-applyParamAdditions(spec);
+// Corrections to the scraped spec, folded in before anything reads it, so the
+// params interfaces and the OpenAPI document agree with what the server
+// actually wants. See scripts/overrides.ts for what each one is and why.
+applySpecCorrections(spec);
 
 /**
  * Maps a documented param type to the TypeScript type the client accepts.

@@ -9621,8 +9621,21 @@ export type PersonCreateParams = {
   /**
    * A list of addresses (street, house number, zip, city, country). This is a
    * JSON array [{...},{...},...] with the following parameters:
+   * Serialized to JSON before sending.
    */
-  addresses?: string | readonly Record<string, unknown>[] | null;
+  addresses?: readonly ({
+    type: "MAIN" | "INVOICE" | "DELIVERY" | "SALARY" | "HISTORICAL" | "OTHER";
+    address?: string;
+    canton?: "AG" | "AI" | "AR" | "BE" | "BL" | "BS" | "FR" | "GE" | "GL" | "GR" | "JU" | "LU" | "NE" | "NW" | "OW" | "SG" | "SH" | "SO" | "SZ" | "TG" | "TI" | "UR" | "VD" | "VS" | "ZG" | "ZH";
+    city?: string;
+    company?: string;
+    country?: "AFG" | "ALA" | "ALB" | "DZA" | "ASM" | "AND" | "AGO" | "AIA" | "ATG" | "ARG" | "ARM" | "ABW" | "AUS" | "AUT" | "AZE" | "BHS" | "BHR" | "BGD" | "BRB" | "BLR" | "BEL" | "BLZ" | "BEN" | "BMU" | "BTN" | "BOL" | "BES" | "BIH" | "BWA" | "BVT" | "BRA" | "IOT" | "BRN" | "BGR" | "BFA" | "BDI" | "KHM" | "CMR" | "CAN" | "CPV" | "CYM" | "CAF" | "TCD" | "CHL" | "CHN" | "CXR" | "CCK" | "COL" | "COM" | "COG" | "COK" | "CRI" | "CIV" | "HRV" | "CUB" | "CUW" | "CYP" | "CZE" | "DNK" | "DJI" | "DOM" | "DMA" | "ECU" | "EGY" | "SLV" | "GNQ" | "ERI" | "EST" | "ETH" | "FLK" | "FRO" | "FJI" | "FIN" | "FRA" | "GUF" | "GUY" | "PYF" | "GAB" | "GMB" | "GEO" | "DEU" | "GHA" | "GIB" | "GRC" | "GRL" | "GRD" | "GLP" | "GUM" | "GTM" | "GGY" | "GNB" | "GIN" | "HTI" | "HMD" | "VAT" | "HND" | "HKG" | "HUN" | "IND" | "IDN" | "IRN" | "IRQ" | "IRL" | "IMN" | "ISR" | "ITA" | "JAM" | "JPN" | "JEY" | "JOR" | "KAZ" | "KEN" | "KIR" | "PRK" | "KOR" | "KWT" | "KGZ" | "LAO" | "LVA" | "LBN" | "LSO" | "LBR" | "LBY" | "LIE" | "LTU" | "LUX" | "MAC" | "MKD" | "MDG" | "MWI" | "MYS" | "MDV" | "SOM" | "MLI" | "MLT" | "MHL" | "MTQ" | "MRT" | "MUS" | "MYT" | "MEX" | "FSM" | "MDA" | "MCO" | "MNG" | "MNE" | "MSR" | "MAR" | "MOZ" | "MMR" | "NAM" | "NRU" | "NPL" | "NLD" | "NCL" | "NZL" | "NIC" | "NGA" | "NER" | "NIU" | "NFK" | "MNP" | "NOR" | "OMN" | "PAK" | "PLW" | "PSE" | "PAN" | "PNG" | "PRY" | "PER" | "PHL" | "PCN" | "POL" | "PRT" | "PRI" | "QAT" | "REU" | "ROU" | "RUS" | "RWA" | "BLM" | "SHN" | "KNA" | "LCA" | "MAF" | "SPM" | "VCT" | "WSM" | "SMR" | "STP" | "SAU" | "SEN" | "SRB" | "SYC" | "SLE" | "SGP" | "SXM" | "SVK" | "SVN" | "SLB" | "ZAF" | "SGS" | "SSD" | "ESP" | "LKA" | "SDN" | "SUR" | "SJM" | "SWZ" | "SWE" | "CHE" | "SYR" | "TWN" | "TJK" | "TZA" | "THA" | "TLS" | "TGO" | "TKL" | "TON" | "TTO" | "TUN" | "TUR" | "TKM" | "TCA" | "TUV" | "UGA" | "UKR" | "ARE" | "GBR" | "USA" | "URY" | "UZB" | "VUT" | "VEN" | "VNM" | "VIR" | "VGB" | "WLF" | "YEM" | "ZMB" | "ZWE" | "ISL";
+    firstName?: string;
+    isHideCompany?: boolean;
+    isHideName?: boolean;
+    lastName?: string;
+    zip?: string;
+  })[] | null;
   /**
    * An alternative name for this person (for organizational chart). This can
    * contain localized text. To add values in multiple languages, use the XML
@@ -9642,8 +9655,14 @@ export type PersonCreateParams = {
   /**
    * A list of bank accounts (IBAN, BIC). This is a JSON array
    * [{...},{...},...] with the following parameters:
+   * Serialized to JSON before sending.
    */
-  bankAccounts?: string | readonly Record<string, unknown>[] | null;
+  bankAccounts?: readonly ({
+    iban: string;
+    type: "DEFAULT" | "ORDER" | "SALARY" | "HISTORICAL" | "OTHER";
+    bic?: string;
+    notes?: string;
+  })[] | null;
   /**
    * Unstructured bank information, if IBAN/BIC not available. Otherwise use
    * bankAccounts .
@@ -9665,8 +9684,16 @@ export type PersonCreateParams = {
   /**
    * A list of children. isEmployee or isFamily must be set. This is a JSON
    * array [{...},{...},...] with the following parameters:
+   * Serialized to JSON before sending.
    */
-  children?: string | null;
+  children?: readonly ({
+    name: string;
+    dateBenefitBegin?: Date | string;
+    dateBenefitEnd?: Date | string;
+    dateBirth?: Date | string;
+    dateInEducation?: Date | string;
+    notes?: string;
+  })[] | null;
   /**
    * The color to use for this person in the organizational chart. Leave empty
    * for white. Possible values: BLUE, GREEN, RED, YELLOW, ORANGE, BLACK, GRAY,
@@ -9676,8 +9703,13 @@ export type PersonCreateParams = {
   /**
    * A list of contact information (e-mail, phone, url, etc.). This is a JSON
    * array [{...},{...},...] with the following parameters:
+   * Serialized to JSON before sending.
    */
-  contacts?: string | null;
+  contacts?: readonly ({
+    address: string;
+    type: "EMAIL_INVOICE" | "EMAIL_WORK" | "EMAIL_PRIVATE" | "PHONE_RECEPTION" | "PHONE_WORK" | "PHONE_PRIVATE" | "MOBILE_WORK" | "MOBILE_PRIVATE" | "FAX" | "WEBSITE" | "MESSENGER" | "OTHER";
+    notes?: string;
+  })[] | null;
   /**
    * Custom field values. They are stored as XML in this parameter. Example:
    * <values><customField1>My value</customField1><customField2>["value
@@ -9707,8 +9739,13 @@ export type PersonCreateParams = {
   /**
    * A list of insurance contracts, if isInsurance is set. This is a JSON array
    * [{...},{...},...] with the following parameters:
+   * Serialized to JSON before sending.
    */
-  insuranceContracts?: string | null;
+  insuranceContracts?: readonly ({
+    typeId: number;
+    contractNr?: string;
+    subNr?: string;
+  })[] | null;
   /**
    * Member number (for insurance). isInsurance must be set.
    * Max length: 32.
@@ -9779,8 +9816,13 @@ export type PersonCreateParams = {
    * A list of service periods (entry and exit of the employee). isEmployee
    * must be set. This is a JSON array [{...},{...},...] with the following
    * parameters:
+   * Serialized to JSON before sending.
    */
-  servicePeriods?: string | null;
+  servicePeriods?: readonly ({
+    dateEntry: Date | string;
+    dateExit?: Date | string;
+    notes?: string;
+  })[] | null;
   /**
    * Social security number of the employee. isEmployee must be set.
    * Max length: 32.
@@ -10365,8 +10407,21 @@ export type PersonUpdateParams = {
   /**
    * A list of addresses (street, house number, zip, city, country). This is a
    * JSON array [{...},{...},...] with the following parameters:
+   * Serialized to JSON before sending.
    */
-  addresses?: string | readonly Record<string, unknown>[] | null;
+  addresses?: readonly ({
+    type: "MAIN" | "INVOICE" | "DELIVERY" | "SALARY" | "HISTORICAL" | "OTHER";
+    address?: string;
+    canton?: "AG" | "AI" | "AR" | "BE" | "BL" | "BS" | "FR" | "GE" | "GL" | "GR" | "JU" | "LU" | "NE" | "NW" | "OW" | "SG" | "SH" | "SO" | "SZ" | "TG" | "TI" | "UR" | "VD" | "VS" | "ZG" | "ZH";
+    city?: string;
+    company?: string;
+    country?: "AFG" | "ALA" | "ALB" | "DZA" | "ASM" | "AND" | "AGO" | "AIA" | "ATG" | "ARG" | "ARM" | "ABW" | "AUS" | "AUT" | "AZE" | "BHS" | "BHR" | "BGD" | "BRB" | "BLR" | "BEL" | "BLZ" | "BEN" | "BMU" | "BTN" | "BOL" | "BES" | "BIH" | "BWA" | "BVT" | "BRA" | "IOT" | "BRN" | "BGR" | "BFA" | "BDI" | "KHM" | "CMR" | "CAN" | "CPV" | "CYM" | "CAF" | "TCD" | "CHL" | "CHN" | "CXR" | "CCK" | "COL" | "COM" | "COG" | "COK" | "CRI" | "CIV" | "HRV" | "CUB" | "CUW" | "CYP" | "CZE" | "DNK" | "DJI" | "DOM" | "DMA" | "ECU" | "EGY" | "SLV" | "GNQ" | "ERI" | "EST" | "ETH" | "FLK" | "FRO" | "FJI" | "FIN" | "FRA" | "GUF" | "GUY" | "PYF" | "GAB" | "GMB" | "GEO" | "DEU" | "GHA" | "GIB" | "GRC" | "GRL" | "GRD" | "GLP" | "GUM" | "GTM" | "GGY" | "GNB" | "GIN" | "HTI" | "HMD" | "VAT" | "HND" | "HKG" | "HUN" | "IND" | "IDN" | "IRN" | "IRQ" | "IRL" | "IMN" | "ISR" | "ITA" | "JAM" | "JPN" | "JEY" | "JOR" | "KAZ" | "KEN" | "KIR" | "PRK" | "KOR" | "KWT" | "KGZ" | "LAO" | "LVA" | "LBN" | "LSO" | "LBR" | "LBY" | "LIE" | "LTU" | "LUX" | "MAC" | "MKD" | "MDG" | "MWI" | "MYS" | "MDV" | "SOM" | "MLI" | "MLT" | "MHL" | "MTQ" | "MRT" | "MUS" | "MYT" | "MEX" | "FSM" | "MDA" | "MCO" | "MNG" | "MNE" | "MSR" | "MAR" | "MOZ" | "MMR" | "NAM" | "NRU" | "NPL" | "NLD" | "NCL" | "NZL" | "NIC" | "NGA" | "NER" | "NIU" | "NFK" | "MNP" | "NOR" | "OMN" | "PAK" | "PLW" | "PSE" | "PAN" | "PNG" | "PRY" | "PER" | "PHL" | "PCN" | "POL" | "PRT" | "PRI" | "QAT" | "REU" | "ROU" | "RUS" | "RWA" | "BLM" | "SHN" | "KNA" | "LCA" | "MAF" | "SPM" | "VCT" | "WSM" | "SMR" | "STP" | "SAU" | "SEN" | "SRB" | "SYC" | "SLE" | "SGP" | "SXM" | "SVK" | "SVN" | "SLB" | "ZAF" | "SGS" | "SSD" | "ESP" | "LKA" | "SDN" | "SUR" | "SJM" | "SWZ" | "SWE" | "CHE" | "SYR" | "TWN" | "TJK" | "TZA" | "THA" | "TLS" | "TGO" | "TKL" | "TON" | "TTO" | "TUN" | "TUR" | "TKM" | "TCA" | "TUV" | "UGA" | "UKR" | "ARE" | "GBR" | "USA" | "URY" | "UZB" | "VUT" | "VEN" | "VNM" | "VIR" | "VGB" | "WLF" | "YEM" | "ZMB" | "ZWE" | "ISL";
+    firstName?: string;
+    isHideCompany?: boolean;
+    isHideName?: boolean;
+    lastName?: string;
+    zip?: string;
+  })[] | null;
   /**
    * An alternative name for this person (for organizational chart). This can
    * contain localized text. To add values in multiple languages, use the XML
@@ -10386,8 +10441,14 @@ export type PersonUpdateParams = {
   /**
    * A list of bank accounts (IBAN, BIC). This is a JSON array
    * [{...},{...},...] with the following parameters:
+   * Serialized to JSON before sending.
    */
-  bankAccounts?: string | readonly Record<string, unknown>[] | null;
+  bankAccounts?: readonly ({
+    iban: string;
+    type: "DEFAULT" | "ORDER" | "SALARY" | "HISTORICAL" | "OTHER";
+    bic?: string;
+    notes?: string;
+  })[] | null;
   /**
    * Unstructured bank information, if IBAN/BIC not available. Otherwise use
    * bankAccounts .
@@ -10409,8 +10470,16 @@ export type PersonUpdateParams = {
   /**
    * A list of children. isEmployee or isFamily must be set. This is a JSON
    * array [{...},{...},...] with the following parameters:
+   * Serialized to JSON before sending.
    */
-  children?: string | null;
+  children?: readonly ({
+    name: string;
+    dateBenefitBegin?: Date | string;
+    dateBenefitEnd?: Date | string;
+    dateBirth?: Date | string;
+    dateInEducation?: Date | string;
+    notes?: string;
+  })[] | null;
   /**
    * The color to use for this person in the organizational chart. Leave empty
    * for white. Possible values: BLUE, GREEN, RED, YELLOW, ORANGE, BLACK, GRAY,
@@ -10420,8 +10489,13 @@ export type PersonUpdateParams = {
   /**
    * A list of contact information (e-mail, phone, url, etc.). This is a JSON
    * array [{...},{...},...] with the following parameters:
+   * Serialized to JSON before sending.
    */
-  contacts?: string | null;
+  contacts?: readonly ({
+    address: string;
+    type: "EMAIL_INVOICE" | "EMAIL_WORK" | "EMAIL_PRIVATE" | "PHONE_RECEPTION" | "PHONE_WORK" | "PHONE_PRIVATE" | "MOBILE_WORK" | "MOBILE_PRIVATE" | "FAX" | "WEBSITE" | "MESSENGER" | "OTHER";
+    notes?: string;
+  })[] | null;
   /**
    * Custom field values. They are stored as XML in this parameter. Example:
    * <values><customField1>My value</customField1><customField2>["value
@@ -10451,8 +10525,13 @@ export type PersonUpdateParams = {
   /**
    * A list of insurance contracts, if isInsurance is set. This is a JSON array
    * [{...},{...},...] with the following parameters:
+   * Serialized to JSON before sending.
    */
-  insuranceContracts?: string | null;
+  insuranceContracts?: readonly ({
+    typeId: number;
+    contractNr?: string;
+    subNr?: string;
+  })[] | null;
   /**
    * Member number (for insurance). isInsurance must be set.
    * Max length: 32.
@@ -10523,8 +10602,13 @@ export type PersonUpdateParams = {
    * A list of service periods (entry and exit of the employee). isEmployee
    * must be set. This is a JSON array [{...},{...},...] with the following
    * parameters:
+   * Serialized to JSON before sending.
    */
-  servicePeriods?: string | null;
+  servicePeriods?: readonly ({
+    dateEntry: Date | string;
+    dateExit?: Date | string;
+    notes?: string;
+  })[] | null;
   /**
    * Social security number of the employee. isEmployee must be set.
    * Max length: 32.
@@ -11866,8 +11950,12 @@ export type SalaryInsuranceTypeCreateParams = {
   /**
    * A list of codes (like A1, A2, etc.). This is a JSON array
    * [{...},{...},...] with the following parameters:
+   * Serialized to JSON before sending.
    */
-  codes?: string | null;
+  codes?: readonly ({
+    name: string;
+    description?: string;
+  })[] | null;
   /**
    * An optional description. This can contain localized text. To add values in
    * multiple languages, use the XML format like this: <values><de>German
@@ -11903,8 +11991,12 @@ export type SalaryInsuranceTypeUpdateParams = {
   /**
    * A list of codes (like A1, A2, etc.). This is a JSON array
    * [{...},{...},...] with the following parameters:
+   * Serialized to JSON before sending.
    */
-  codes?: string | null;
+  codes?: readonly ({
+    name: string;
+    description?: string;
+  })[] | null;
   /**
    * An optional description. This can contain localized text. To add values in
    * multiple languages, use the XML format like this: <values><de>German
@@ -12826,8 +12918,13 @@ export type SalaryStatementUpdateMultipleParams = {
    * Sent as a comma-separated list.
    */
   ids: string | number | readonly (string | number)[];
-  /** List of file attachments (overrides existing attachments). */
-  attachments?: string | null;
+  /**
+   * List of file attachments (overrides existing attachments).
+   * Serialized to JSON before sending.
+   */
+  attachments?: readonly ({
+    fileId?: number;
+  })[] | null;
   /**
    * New values for custom fields.
    * Expects CashCtrl's XML `<values>` format.
@@ -14356,14 +14453,27 @@ export type TaxCreateParams = {
    * Max length: 32.
    */
   code: string;
-  /** The components of the tax code, up to two possible. */
-  components: string | readonly Record<string, unknown>[];
+  /**
+   * The components of the tax code, up to two possible.
+   * Serialized to JSON before sending.
+   */
+  components: readonly ({
+    accountId: number;
+    applyRule: "CREDIT" | "DEBIT" | "REVENUE" | "EXPENSE" | "LEGACY_REV" | "LEGACY_EXP";
+    calcType: "NET" | "GROSS";
+    code?: string;
+  })[];
   /**
    * Tax rates that are valid from a given date. Add a new tax rate here if the
    * official tax rate changes. Exactly one tax rate must exist without a valid
    * from date.
+   * Serialized to JSON before sending.
    */
-  rates: string | readonly Record<string, unknown>[];
+  rates: readonly ({
+    percentage: number;
+    dateValid?: Date | string;
+    percentageFlat?: number;
+  })[];
   /**
    * A description for the tax code. This can contain localized text. To add
    * values in multiple languages, use the XML format like this:
@@ -14414,16 +14524,29 @@ export type TaxUpdateParams = {
    * Max length: 32.
    */
   code: string;
-  /** The components of the tax code, up to two possible. */
-  components: string | readonly Record<string, unknown>[];
+  /**
+   * The components of the tax code, up to two possible.
+   * Serialized to JSON before sending.
+   */
+  components: readonly ({
+    accountId: number;
+    applyRule: "CREDIT" | "DEBIT" | "REVENUE" | "EXPENSE" | "LEGACY_REV" | "LEGACY_EXP";
+    calcType: "NET" | "GROSS";
+    code?: string;
+  })[];
   /** The ID of the tax code to update. */
   id: number;
   /**
    * Tax rates that are valid from a given date. Add a new tax rate here if the
    * official tax rate changes. Exactly one tax rate must exist without a valid
    * from date.
+   * Serialized to JSON before sending.
    */
-  rates: string | readonly Record<string, unknown>[];
+  rates: readonly ({
+    percentage: number;
+    dateValid?: Date | string;
+    percentageFlat?: number;
+  })[];
   /**
    * A description for the tax code. This can contain localized text. To add
    * values in multiple languages, use the XML format like this:

@@ -521,26 +521,65 @@ const accounts: Suite = {
       rounding: 0.05,
     }, { name: `${t}-round2` });
 
-    // `components` and `rates` are documented as TEXT but are really JSON
-    // arrays; scripts/overrides.ts widens both so an array can be passed
-    // straight through and the serializer encodes it. Clone an existing code
-    // rather than invent one: neither array's fields are documented.
-    const sample = w.sampleTax;
-    if (!sample) {
-      ctx.check("tax: an existing code to clone", false, "none in this org");
-    } else {
-      const withoutIds = (rows: unknown): Record<string, unknown>[] =>
-        (Array.isArray(rows) ? rows : []).map((row) => {
-          const { id: _id, ...rest } = row as Record<string, unknown>;
-          return rest;
-        });
-      // `description` is documented as optional; the server rejects it empty.
-      await crud(ctx, "tax", cc.tax as unknown as Crud, {
-        code: `${t.slice(-6)}`,
-        components: withoutIds(sample.components),
-        rates: withoutIds(sample.rates),
-        description: `${t} tax code`,
-      }, { code: `${t.slice(-6)}b` });
+    // Tax codes go through the typed methods rather than `crud`, whose
+    // Record<string, unknown> params would erase exactly the structure worth
+    // checking here: `components` and `rates` are documented as TEXT, but
+    // each has a full sub-table the generator now emits as an object array.
+    const taxAccountId =
+      (w.sampleTax?.components as { accountId?: number }[] | undefined)
+        ?.[0]?.accountId ?? w.accountLike("2");
+    const code = t.slice(-6);
+
+    const taxId = await ctx.step("tax create", async () =>
+      insertId(
+        await cc.tax.create({
+          code,
+          // `description` is documented as optional; rejected when empty.
+          description: `${t} tax code`,
+          components: [
+            // `code` is documented as optional, but without it the whole
+            // array is discarded: "At least one component must be set."
+            {
+              accountId: taxAccountId,
+              applyRule: "CREDIT",
+              calcType: "NET",
+              code: "302",
+            },
+          ],
+          rates: [{ percentage: 8.1 }],
+        }),
+      ));
+    if (taxId !== undefined) {
+      ctx.defer(`tax ${taxId}`, () => cc.tax.delete({ ids: taxId }));
+      const record = await ctx.step(
+        "tax read back",
+        () => cc.tax.read({ id: taxId }),
+      ) as Record<string, unknown> | undefined;
+      if (record) {
+        ctx.check(
+          "tax persisted the rate",
+          Number(
+            (record.rates as { percentage?: number }[] | undefined)?.[0]
+              ?.percentage,
+          ) === 8.1,
+          String(record.currentPercentage),
+        );
+      }
+      await ctx.step("tax update", () =>
+        cc.tax.update({
+          id: taxId,
+          code,
+          description: `${t} tax code 2`,
+          components: [
+            {
+              accountId: taxAccountId,
+              applyRule: "CREDIT",
+              calcType: "NET",
+              code: "302",
+            },
+          ],
+          rates: [{ percentage: 7.7 }],
+        }));
     }
   },
 };

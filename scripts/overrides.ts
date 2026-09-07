@@ -11,7 +11,7 @@
  * wrong, leave it alone.
  */
 
-import type { Param } from "./ir.ts";
+import type { Endpoint, Param } from "./ir.ts";
 
 /** Widens a parameter's generated TypeScript type. */
 export interface TypeOverride {
@@ -41,75 +41,6 @@ export const TYPE_OVERRIDES: TypeOverride[] = [
     param: "items.unitId",
     tsType: "string | number",
     reason: "Same as order/create.json.",
-  },
-  // Four params CashCtrl types as TEXT whose value must be a JSON array. A
-  // string the caller JSON-encoded is accepted, so these are usable today -
-  // the type simply gives no hint that encoding is required. Widened to take
-  // the array directly, which the serializer already encodes.
-  {
-    path: "/api/v1/tax/create.json",
-    param: "components",
-    tsType: "string | readonly Record<string, unknown>[]",
-    reason: "Documented as TEXT with no format given at all. tax/read.json " +
-      "returns it as an array of objects ({ accountId, code, calcType, " +
-      "applyRule, pos, isInputTax }), and the value must be that array " +
-      "JSON-encoded - any other string is a 500. A JSON string a caller " +
-      "encoded themselves is accepted, so this widening is ergonomic " +
-      "rather than corrective: it removes a JSON.stringify the type gave " +
-      "no hint was needed. Verified against a live organisation on " +
-      "2026-09-07. Left as Record<string, unknown> rather than the " +
-      "observed shape: the component fields are not documented anywhere, " +
-      "so pinning them would be inference dressed up as specification.",
-  },
-  {
-    path: "/api/v1/tax/update.json",
-    param: "components",
-    tsType: "string | readonly Record<string, unknown>[]",
-    reason: "Same as tax/create.json.",
-  },
-  {
-    path: "/api/v1/tax/create.json",
-    param: "rates",
-    tsType: "string | readonly Record<string, unknown>[]",
-    reason: "Same story as components: read returns an array of " +
-      "{ dateValid, percentage, percentageFlat } and create requires it.",
-  },
-  {
-    path: "/api/v1/tax/update.json",
-    param: "rates",
-    tsType: "string | readonly Record<string, unknown>[]",
-    reason: "Same as tax/create.json.",
-  },
-  {
-    path: "/api/v1/person/create.json",
-    param: "addresses",
-    tsType: "string | readonly Record<string, unknown>[]",
-    reason:
-      "Documented as TEXT. person/read.json returns an array of address " +
-      "objects ({ type, address, zip, city, country, ... }) and create " +
-      "accepts the same JSON - posting it round-trips, and an order to a " +
-      "person without one cannot be paid ('Recipient: Address must be " +
-      "set'). Verified against a live organisation on 2026-09-07.",
-  },
-  {
-    path: "/api/v1/person/update.json",
-    param: "addresses",
-    tsType: "string | readonly Record<string, unknown>[]",
-    reason: "Same as person/create.json.",
-  },
-  {
-    path: "/api/v1/person/create.json",
-    param: "bankAccounts",
-    tsType: "string | readonly Record<string, unknown>[]",
-    reason:
-      "Same story as addresses: an array of { iban, bic, type }, required " +
-      "before a payment to this person can be created.",
-  },
-  {
-    path: "/api/v1/person/update.json",
-    param: "bankAccounts",
-    tsType: "string | readonly Record<string, unknown>[]",
-    reason: "Same as person/create.json.",
   },
   {
     path: "*",
@@ -266,4 +197,108 @@ export const OPEN_PARAM_ENDPOINTS: OpenParams[] = [
 
 export function openParams(path: string): OpenParams | undefined {
   return OPEN_PARAM_ENDPOINTS.find((o) => o.path === path);
+}
+
+/* -------------------------------------------------- structured params -- */
+
+/**
+ * CashCtrl documents a structured parameter by giving it a nested parameter
+ * table. The scraper records that as `fields`, faithfully, alongside whatever
+ * type the docs claim - and for 19 params the claimed type is TEXT.
+ *
+ * A sub-table *is* the statement that the value is structured: there is
+ * nothing else it could mean, and CashCtrl types the other 116 such params
+ * JSON itself. So this is one rule rather than nineteen entries, and it costs
+ * nothing when upstream fixes the type - the param is already JSON and the
+ * rule does not fire.
+ *
+ * Without it the generator sees `type: "TEXT"`, never looks at `fields`, and
+ * emits `string` for a parameter whose shape is fully documented - which is
+ * how `person.addresses` came to be typed `string` despite its eleven
+ * documented fields.
+ */
+export function applyDocumentedShapes(
+  spec: { endpoints: { params: Param[] }[] },
+): void {
+  for (const endpoint of spec.endpoints) {
+    for (const param of endpoint.params) {
+      if (param.fields?.length && param.type !== "JSON") param.type = "JSON";
+    }
+  }
+}
+
+/**
+ * Params that are arrays although their description omits the "This is a JSON
+ * array" wording the scraper keys on.
+ *
+ * Narrower than the rule above on purpose: `isArray` cannot be inferred from
+ * the presence of a sub-table, since plenty of JSON params are a single
+ * object.
+ */
+export interface ArrayCorrection {
+  path: string;
+  param: string;
+  reason: string;
+}
+
+export const ARRAY_CORRECTIONS: ArrayCorrection[] = [
+  {
+    path: "/api/v1/tax/create.json",
+    param: "components",
+    reason:
+      "Described as 'the components of the tax code, up to two possible' - " +
+      "plural, but without the array wording. tax/read.json returns an " +
+      "array, and create only accepts one: a single object is rejected. " +
+      "Verified against a live organisation on 2026-09-07.",
+  },
+  {
+    path: "/api/v1/tax/update.json",
+    param: "components",
+    reason: "Same as tax/create.json.",
+  },
+  {
+    path: "/api/v1/tax/create.json",
+    param: "rates",
+    reason: "Same as components: read returns an array, and the description " +
+      "itself says exactly one rate must have no dateValid, which only " +
+      "makes sense for a list.",
+  },
+  {
+    path: "/api/v1/tax/update.json",
+    param: "rates",
+    reason: "Same as tax/create.json.",
+  },
+  {
+    path: "/api/v1/salary/statement/update_multiple.json",
+    param: "attachments",
+    reason:
+      "'List of file attachments (overrides existing attachments)' with the " +
+      "same single fileId field as salary/statement/create and /update, " +
+      "both of which CashCtrl types as JSON arrays. Only the boilerplate " +
+      "sentence the scraper keys on is missing.",
+  },
+];
+
+export function applyArrayCorrections(
+  spec: { endpoints: { path: string; params: Param[] }[] },
+): void {
+  for (const correction of ARRAY_CORRECTIONS) {
+    const endpoint = spec.endpoints.find((e) => e.path === correction.path);
+    const param = endpoint?.params.find((p) => p.name === correction.param);
+    if (param) param.isArray = true;
+  }
+}
+
+/**
+ * Every correction, in the order they depend on each other.
+ *
+ * Each consumer of `spec/api.json` calls this - the generated client, the
+ * OpenAPI document, the search index and the contract test - because a
+ * consumer that skips it disagrees with the others about what an endpoint
+ * takes, and the one that disagrees is the one somebody reads.
+ */
+export function applySpecCorrections(spec: { endpoints: Endpoint[] }): void {
+  applyParamAdditions(spec);
+  applyDocumentedShapes(spec);
+  applyArrayCorrections(spec);
 }

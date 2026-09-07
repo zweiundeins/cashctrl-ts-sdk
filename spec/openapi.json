@@ -29320,7 +29320,345 @@
                   },
                   "addresses": {
                     "description": "A list of addresses (street, house number, zip, city, country). This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "description": "The type of address. Main address, invoice address, etc. Possible values: MAIN, INVOICE, DELIVERY, SALARY, HISTORICAL, OTHER.",
+                            "type": "string",
+                            "enum": [
+                              "MAIN",
+                              "INVOICE",
+                              "DELIVERY",
+                              "SALARY",
+                              "HISTORICAL",
+                              "OTHER"
+                            ]
+                          },
+                          "address": {
+                            "description": "The address (street, house number, additional info). Can contain multiple lines.",
+                            "type": "string"
+                          },
+                          "canton": {
+                            "description": "The canton of the address (Switzerland only). Possible values: AG, AI, AR, BE, BL, BS, FR, GE, GL, GR, JU, LU, NE, NW, OW, SG, SH, SO, SZ, TG, TI, UR, VD, VS, ZG, ZH.",
+                            "type": "string",
+                            "enum": [
+                              "AG",
+                              "AI",
+                              "AR",
+                              "BE",
+                              "BL",
+                              "BS",
+                              "FR",
+                              "GE",
+                              "GL",
+                              "GR",
+                              "JU",
+                              "LU",
+                              "NE",
+                              "NW",
+                              "OW",
+                              "SG",
+                              "SH",
+                              "SO",
+                              "SZ",
+                              "TG",
+                              "TI",
+                              "UR",
+                              "VD",
+                              "VS",
+                              "ZG",
+                              "ZH"
+                            ]
+                          },
+                          "city": {
+                            "description": "The town / city of the address.",
+                            "type": "string"
+                          },
+                          "company": {
+                            "description": "Company name of the recipient.",
+                            "type": "string"
+                          },
+                          "country": {
+                            "description": "The country of the address. Possible values: AFG, ALA, ALB, DZA, ASM, AND, AGO, AIA, ATG, ARG, ARM, ABW, AUS, AUT, AZE, BHS, BHR, BGD, BRB, BLR, BEL, BLZ, BEN, BMU, BTN, BOL, BES, BIH, BWA, BVT, BRA, IOT, BRN, BGR, BFA, BDI, KHM, CMR, CAN, CPV, CYM, CAF, TCD, CHL, CHN, CXR, CCK, COL, COM, COG, COK, CRI, CIV, HRV, CUB, CUW, CYP, CZE, DNK, DJI, DOM, DMA, ECU, EGY, SLV, GNQ, ERI, EST, ETH, FLK, FRO, FJI, FIN, FRA, GUF, GUY, PYF, GAB, GMB, GEO, DEU, GHA, GIB, GRC, GRL, GRD, GLP, GUM, GTM, GGY, GNB, GIN, HTI, HMD, VAT, HND, HKG, HUN, IND, IDN, IRN, IRQ, IRL, IMN, ISR, ITA, JAM, JPN, JEY, JOR, KAZ, KEN, KIR, PRK, KOR, KWT, KGZ, LAO, LVA, LBN, LSO, LBR, LBY, LIE, LTU, LUX, MAC, MKD, MDG, MWI, MYS, MDV, SOM, MLI, MLT, MHL, MTQ, MRT, MUS, MYT, MEX, FSM, MDA, MCO, MNG, MNE, MSR, MAR, MOZ, MMR, NAM, NRU, NPL, NLD, NCL, NZL, NIC, NGA, NER, NIU, NFK, MNP, NOR, OMN, PAK, PLW, PSE, PAN, PNG, PRY, PER, PHL, PCN, POL, PRT, PRI, QAT, REU, ROU, RUS, RWA, BLM, SHN, KNA, LCA, MAF, SPM, VCT, WSM, SMR, STP, SAU, SEN, SRB, SYC, SLE, SGP, SXM, SVK, SVN, SLB, ZAF, SGS, SSD, ESP, LKA, SDN, SUR, SJM, SWZ, SWE, CHE, SYR, TWN, TJK, TZA, THA, TLS, TGO, TKL, TON, TTO, TUN, TUR, TKM, TCA, TUV, UGA, UKR, ARE, GBR, USA, URY, UZB, VUT, VEN, VNM, VIR, VGB, WLF, YEM, ZMB, ZWE, ISL.",
+                            "type": "string",
+                            "enum": [
+                              "AFG",
+                              "ALA",
+                              "ALB",
+                              "DZA",
+                              "ASM",
+                              "AND",
+                              "AGO",
+                              "AIA",
+                              "ATG",
+                              "ARG",
+                              "ARM",
+                              "ABW",
+                              "AUS",
+                              "AUT",
+                              "AZE",
+                              "BHS",
+                              "BHR",
+                              "BGD",
+                              "BRB",
+                              "BLR",
+                              "BEL",
+                              "BLZ",
+                              "BEN",
+                              "BMU",
+                              "BTN",
+                              "BOL",
+                              "BES",
+                              "BIH",
+                              "BWA",
+                              "BVT",
+                              "BRA",
+                              "IOT",
+                              "BRN",
+                              "BGR",
+                              "BFA",
+                              "BDI",
+                              "KHM",
+                              "CMR",
+                              "CAN",
+                              "CPV",
+                              "CYM",
+                              "CAF",
+                              "TCD",
+                              "CHL",
+                              "CHN",
+                              "CXR",
+                              "CCK",
+                              "COL",
+                              "COM",
+                              "COG",
+                              "COK",
+                              "CRI",
+                              "CIV",
+                              "HRV",
+                              "CUB",
+                              "CUW",
+                              "CYP",
+                              "CZE",
+                              "DNK",
+                              "DJI",
+                              "DOM",
+                              "DMA",
+                              "ECU",
+                              "EGY",
+                              "SLV",
+                              "GNQ",
+                              "ERI",
+                              "EST",
+                              "ETH",
+                              "FLK",
+                              "FRO",
+                              "FJI",
+                              "FIN",
+                              "FRA",
+                              "GUF",
+                              "GUY",
+                              "PYF",
+                              "GAB",
+                              "GMB",
+                              "GEO",
+                              "DEU",
+                              "GHA",
+                              "GIB",
+                              "GRC",
+                              "GRL",
+                              "GRD",
+                              "GLP",
+                              "GUM",
+                              "GTM",
+                              "GGY",
+                              "GNB",
+                              "GIN",
+                              "HTI",
+                              "HMD",
+                              "VAT",
+                              "HND",
+                              "HKG",
+                              "HUN",
+                              "IND",
+                              "IDN",
+                              "IRN",
+                              "IRQ",
+                              "IRL",
+                              "IMN",
+                              "ISR",
+                              "ITA",
+                              "JAM",
+                              "JPN",
+                              "JEY",
+                              "JOR",
+                              "KAZ",
+                              "KEN",
+                              "KIR",
+                              "PRK",
+                              "KOR",
+                              "KWT",
+                              "KGZ",
+                              "LAO",
+                              "LVA",
+                              "LBN",
+                              "LSO",
+                              "LBR",
+                              "LBY",
+                              "LIE",
+                              "LTU",
+                              "LUX",
+                              "MAC",
+                              "MKD",
+                              "MDG",
+                              "MWI",
+                              "MYS",
+                              "MDV",
+                              "SOM",
+                              "MLI",
+                              "MLT",
+                              "MHL",
+                              "MTQ",
+                              "MRT",
+                              "MUS",
+                              "MYT",
+                              "MEX",
+                              "FSM",
+                              "MDA",
+                              "MCO",
+                              "MNG",
+                              "MNE",
+                              "MSR",
+                              "MAR",
+                              "MOZ",
+                              "MMR",
+                              "NAM",
+                              "NRU",
+                              "NPL",
+                              "NLD",
+                              "NCL",
+                              "NZL",
+                              "NIC",
+                              "NGA",
+                              "NER",
+                              "NIU",
+                              "NFK",
+                              "MNP",
+                              "NOR",
+                              "OMN",
+                              "PAK",
+                              "PLW",
+                              "PSE",
+                              "PAN",
+                              "PNG",
+                              "PRY",
+                              "PER",
+                              "PHL",
+                              "PCN",
+                              "POL",
+                              "PRT",
+                              "PRI",
+                              "QAT",
+                              "REU",
+                              "ROU",
+                              "RUS",
+                              "RWA",
+                              "BLM",
+                              "SHN",
+                              "KNA",
+                              "LCA",
+                              "MAF",
+                              "SPM",
+                              "VCT",
+                              "WSM",
+                              "SMR",
+                              "STP",
+                              "SAU",
+                              "SEN",
+                              "SRB",
+                              "SYC",
+                              "SLE",
+                              "SGP",
+                              "SXM",
+                              "SVK",
+                              "SVN",
+                              "SLB",
+                              "ZAF",
+                              "SGS",
+                              "SSD",
+                              "ESP",
+                              "LKA",
+                              "SDN",
+                              "SUR",
+                              "SJM",
+                              "SWZ",
+                              "SWE",
+                              "CHE",
+                              "SYR",
+                              "TWN",
+                              "TJK",
+                              "TZA",
+                              "THA",
+                              "TLS",
+                              "TGO",
+                              "TKL",
+                              "TON",
+                              "TTO",
+                              "TUN",
+                              "TUR",
+                              "TKM",
+                              "TCA",
+                              "TUV",
+                              "UGA",
+                              "UKR",
+                              "ARE",
+                              "GBR",
+                              "USA",
+                              "URY",
+                              "UZB",
+                              "VUT",
+                              "VEN",
+                              "VNM",
+                              "VIR",
+                              "VGB",
+                              "WLF",
+                              "YEM",
+                              "ZMB",
+                              "ZWE",
+                              "ISL"
+                            ]
+                          },
+                          "firstName": {
+                            "description": "First name of the recipient.",
+                            "type": "string"
+                          },
+                          "isHideCompany": {
+                            "description": "Do not display the company name in the document address window. Possible values: true, false.",
+                            "type": "boolean"
+                          },
+                          "isHideName": {
+                            "description": "Do not display the title, first name and last name in the document address window. Possible values: true, false.",
+                            "type": "boolean"
+                          },
+                          "lastName": {
+                            "description": "Last name of the recipient.",
+                            "type": "string"
+                          },
+                          "zip": {
+                            "description": "The postal code of the address.",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      }
+                    }
                   },
                   "altName": {
                     "description": "An alternative name for this person (for organizational chart). This can contain localized text. To add values in multiple languages, use the XML format like this: <values><de>German text</de><en>English text</en></values>",
@@ -29347,7 +29685,46 @@
                   },
                   "bankAccounts": {
                     "description": "A list of bank accounts (IBAN, BIC). This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "iban": {
+                            "description": "The IBAN (International Bank Account Number).",
+                            "type": "string",
+                            "maxLength": 32
+                          },
+                          "type": {
+                            "description": "The type of bank account, i.e. what is the bank account used for? Possible values: DEFAULT, ORDER, SALARY, HISTORICAL, OTHER.",
+                            "type": "string",
+                            "enum": [
+                              "DEFAULT",
+                              "ORDER",
+                              "SALARY",
+                              "HISTORICAL",
+                              "OTHER"
+                            ]
+                          },
+                          "bic": {
+                            "description": "The BIC (Business Identifier Code) of your bank.",
+                            "type": "string",
+                            "maxLength": 11
+                          },
+                          "notes": {
+                            "description": "Some optional notes.",
+                            "type": "string",
+                            "maxLength": 255
+                          }
+                        },
+                        "required": [
+                          "iban",
+                          "type"
+                        ]
+                      }
+                    }
                   },
                   "bankData": {
                     "description": "Unstructured bank information, if IBAN/BIC not available. Otherwise use bankAccounts .",
@@ -29369,7 +29746,52 @@
                   },
                   "children": {
                     "description": "A list of children. isEmployee or isFamily must be set. This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "description": "Name of the child (first and last name).",
+                            "type": "string"
+                          },
+                          "dateBenefitBegin": {
+                            "description": "Child benefit start date (used for salary statements). Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "dateBenefitEnd": {
+                            "description": "Child benefit end date (used for salary statements). Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "dateBirth": {
+                            "description": "The child's date of birth. Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "dateInEducation": {
+                            "description": "Date since child is in education (used for salary statements). Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "notes": {
+                            "description": "Some optional notes.",
+                            "type": "string",
+                            "maxLength": 255
+                          }
+                        },
+                        "required": [
+                          "name"
+                        ]
+                      }
+                    }
                   },
                   "color": {
                     "description": "The color to use for this person in the organizational chart. Leave empty for white. Possible values: BLUE, GREEN, RED, YELLOW, ORANGE, BLACK, GRAY, BROWN, VIOLET, PINK.",
@@ -29389,7 +29811,47 @@
                   },
                   "contacts": {
                     "description": "A list of contact information (e-mail, phone, url, etc.). This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "address": {
+                            "description": "The actual contact information (e-mail address, phone number, etc.).",
+                            "type": "string"
+                          },
+                          "type": {
+                            "description": "The type of contact information. Possible values: EMAIL_INVOICE, EMAIL_WORK, EMAIL_PRIVATE, PHONE_RECEPTION, PHONE_WORK, PHONE_PRIVATE, MOBILE_WORK, MOBILE_PRIVATE, FAX, WEBSITE, MESSENGER, OTHER.",
+                            "type": "string",
+                            "enum": [
+                              "EMAIL_INVOICE",
+                              "EMAIL_WORK",
+                              "EMAIL_PRIVATE",
+                              "PHONE_RECEPTION",
+                              "PHONE_WORK",
+                              "PHONE_PRIVATE",
+                              "MOBILE_WORK",
+                              "MOBILE_PRIVATE",
+                              "FAX",
+                              "WEBSITE",
+                              "MESSENGER",
+                              "OTHER"
+                            ]
+                          },
+                          "notes": {
+                            "description": "Some optional short notes.",
+                            "type": "string",
+                            "maxLength": 255
+                          }
+                        },
+                        "required": [
+                          "address",
+                          "type"
+                        ]
+                      }
+                    }
                   },
                   "custom": {
                     "description": "Custom field values. They are stored as XML in this parameter. Example: <values><customField1>My value</customField1><customField2>[\"value 1\",\"value 2\"]</customField2></values> . Look up custom field variable names (e.g. \"customField1\") in the Custom fields API.",
@@ -29419,7 +29881,31 @@
                   },
                   "insuranceContracts": {
                     "description": "A list of insurance contracts, if isInsurance is set. This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "typeId": {
+                            "description": "ID of the insurance type (e.g. AHV, BVG, etc.).",
+                            "type": "number"
+                          },
+                          "contractNr": {
+                            "description": "Number of the contract with the insurance company.",
+                            "type": "string"
+                          },
+                          "subNr": {
+                            "description": "Optional sub-contract number, if sub-contracts exist.",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "typeId"
+                        ]
+                      }
+                    }
                   },
                   "insuranceMemberNr": {
                     "description": "Member number (for insurance). isInsurance must be set.",
@@ -29495,7 +29981,36 @@
                   },
                   "servicePeriods": {
                     "description": "A list of service periods (entry and exit of the employee). isEmployee must be set. This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dateEntry": {
+                            "description": "The entry date. Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "dateExit": {
+                            "description": "The exit date. Leave empty if this is the current period. Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "notes": {
+                            "description": "Some optional notes.",
+                            "type": "string",
+                            "maxLength": 255
+                          }
+                        },
+                        "required": [
+                          "dateEntry"
+                        ]
+                      }
+                    }
                   },
                   "ssn": {
                     "description": "Social security number of the employee. isEmployee must be set.",
@@ -32535,7 +33050,345 @@
                   },
                   "addresses": {
                     "description": "A list of addresses (street, house number, zip, city, country). This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "description": "The type of address. Main address, invoice address, etc. Possible values: MAIN, INVOICE, DELIVERY, SALARY, HISTORICAL, OTHER.",
+                            "type": "string",
+                            "enum": [
+                              "MAIN",
+                              "INVOICE",
+                              "DELIVERY",
+                              "SALARY",
+                              "HISTORICAL",
+                              "OTHER"
+                            ]
+                          },
+                          "address": {
+                            "description": "The address (street, house number, additional info). Can contain multiple lines.",
+                            "type": "string"
+                          },
+                          "canton": {
+                            "description": "The canton of the address (Switzerland only). Possible values: AG, AI, AR, BE, BL, BS, FR, GE, GL, GR, JU, LU, NE, NW, OW, SG, SH, SO, SZ, TG, TI, UR, VD, VS, ZG, ZH.",
+                            "type": "string",
+                            "enum": [
+                              "AG",
+                              "AI",
+                              "AR",
+                              "BE",
+                              "BL",
+                              "BS",
+                              "FR",
+                              "GE",
+                              "GL",
+                              "GR",
+                              "JU",
+                              "LU",
+                              "NE",
+                              "NW",
+                              "OW",
+                              "SG",
+                              "SH",
+                              "SO",
+                              "SZ",
+                              "TG",
+                              "TI",
+                              "UR",
+                              "VD",
+                              "VS",
+                              "ZG",
+                              "ZH"
+                            ]
+                          },
+                          "city": {
+                            "description": "The town / city of the address.",
+                            "type": "string"
+                          },
+                          "company": {
+                            "description": "Company name of the recipient.",
+                            "type": "string"
+                          },
+                          "country": {
+                            "description": "The country of the address. Possible values: AFG, ALA, ALB, DZA, ASM, AND, AGO, AIA, ATG, ARG, ARM, ABW, AUS, AUT, AZE, BHS, BHR, BGD, BRB, BLR, BEL, BLZ, BEN, BMU, BTN, BOL, BES, BIH, BWA, BVT, BRA, IOT, BRN, BGR, BFA, BDI, KHM, CMR, CAN, CPV, CYM, CAF, TCD, CHL, CHN, CXR, CCK, COL, COM, COG, COK, CRI, CIV, HRV, CUB, CUW, CYP, CZE, DNK, DJI, DOM, DMA, ECU, EGY, SLV, GNQ, ERI, EST, ETH, FLK, FRO, FJI, FIN, FRA, GUF, GUY, PYF, GAB, GMB, GEO, DEU, GHA, GIB, GRC, GRL, GRD, GLP, GUM, GTM, GGY, GNB, GIN, HTI, HMD, VAT, HND, HKG, HUN, IND, IDN, IRN, IRQ, IRL, IMN, ISR, ITA, JAM, JPN, JEY, JOR, KAZ, KEN, KIR, PRK, KOR, KWT, KGZ, LAO, LVA, LBN, LSO, LBR, LBY, LIE, LTU, LUX, MAC, MKD, MDG, MWI, MYS, MDV, SOM, MLI, MLT, MHL, MTQ, MRT, MUS, MYT, MEX, FSM, MDA, MCO, MNG, MNE, MSR, MAR, MOZ, MMR, NAM, NRU, NPL, NLD, NCL, NZL, NIC, NGA, NER, NIU, NFK, MNP, NOR, OMN, PAK, PLW, PSE, PAN, PNG, PRY, PER, PHL, PCN, POL, PRT, PRI, QAT, REU, ROU, RUS, RWA, BLM, SHN, KNA, LCA, MAF, SPM, VCT, WSM, SMR, STP, SAU, SEN, SRB, SYC, SLE, SGP, SXM, SVK, SVN, SLB, ZAF, SGS, SSD, ESP, LKA, SDN, SUR, SJM, SWZ, SWE, CHE, SYR, TWN, TJK, TZA, THA, TLS, TGO, TKL, TON, TTO, TUN, TUR, TKM, TCA, TUV, UGA, UKR, ARE, GBR, USA, URY, UZB, VUT, VEN, VNM, VIR, VGB, WLF, YEM, ZMB, ZWE, ISL.",
+                            "type": "string",
+                            "enum": [
+                              "AFG",
+                              "ALA",
+                              "ALB",
+                              "DZA",
+                              "ASM",
+                              "AND",
+                              "AGO",
+                              "AIA",
+                              "ATG",
+                              "ARG",
+                              "ARM",
+                              "ABW",
+                              "AUS",
+                              "AUT",
+                              "AZE",
+                              "BHS",
+                              "BHR",
+                              "BGD",
+                              "BRB",
+                              "BLR",
+                              "BEL",
+                              "BLZ",
+                              "BEN",
+                              "BMU",
+                              "BTN",
+                              "BOL",
+                              "BES",
+                              "BIH",
+                              "BWA",
+                              "BVT",
+                              "BRA",
+                              "IOT",
+                              "BRN",
+                              "BGR",
+                              "BFA",
+                              "BDI",
+                              "KHM",
+                              "CMR",
+                              "CAN",
+                              "CPV",
+                              "CYM",
+                              "CAF",
+                              "TCD",
+                              "CHL",
+                              "CHN",
+                              "CXR",
+                              "CCK",
+                              "COL",
+                              "COM",
+                              "COG",
+                              "COK",
+                              "CRI",
+                              "CIV",
+                              "HRV",
+                              "CUB",
+                              "CUW",
+                              "CYP",
+                              "CZE",
+                              "DNK",
+                              "DJI",
+                              "DOM",
+                              "DMA",
+                              "ECU",
+                              "EGY",
+                              "SLV",
+                              "GNQ",
+                              "ERI",
+                              "EST",
+                              "ETH",
+                              "FLK",
+                              "FRO",
+                              "FJI",
+                              "FIN",
+                              "FRA",
+                              "GUF",
+                              "GUY",
+                              "PYF",
+                              "GAB",
+                              "GMB",
+                              "GEO",
+                              "DEU",
+                              "GHA",
+                              "GIB",
+                              "GRC",
+                              "GRL",
+                              "GRD",
+                              "GLP",
+                              "GUM",
+                              "GTM",
+                              "GGY",
+                              "GNB",
+                              "GIN",
+                              "HTI",
+                              "HMD",
+                              "VAT",
+                              "HND",
+                              "HKG",
+                              "HUN",
+                              "IND",
+                              "IDN",
+                              "IRN",
+                              "IRQ",
+                              "IRL",
+                              "IMN",
+                              "ISR",
+                              "ITA",
+                              "JAM",
+                              "JPN",
+                              "JEY",
+                              "JOR",
+                              "KAZ",
+                              "KEN",
+                              "KIR",
+                              "PRK",
+                              "KOR",
+                              "KWT",
+                              "KGZ",
+                              "LAO",
+                              "LVA",
+                              "LBN",
+                              "LSO",
+                              "LBR",
+                              "LBY",
+                              "LIE",
+                              "LTU",
+                              "LUX",
+                              "MAC",
+                              "MKD",
+                              "MDG",
+                              "MWI",
+                              "MYS",
+                              "MDV",
+                              "SOM",
+                              "MLI",
+                              "MLT",
+                              "MHL",
+                              "MTQ",
+                              "MRT",
+                              "MUS",
+                              "MYT",
+                              "MEX",
+                              "FSM",
+                              "MDA",
+                              "MCO",
+                              "MNG",
+                              "MNE",
+                              "MSR",
+                              "MAR",
+                              "MOZ",
+                              "MMR",
+                              "NAM",
+                              "NRU",
+                              "NPL",
+                              "NLD",
+                              "NCL",
+                              "NZL",
+                              "NIC",
+                              "NGA",
+                              "NER",
+                              "NIU",
+                              "NFK",
+                              "MNP",
+                              "NOR",
+                              "OMN",
+                              "PAK",
+                              "PLW",
+                              "PSE",
+                              "PAN",
+                              "PNG",
+                              "PRY",
+                              "PER",
+                              "PHL",
+                              "PCN",
+                              "POL",
+                              "PRT",
+                              "PRI",
+                              "QAT",
+                              "REU",
+                              "ROU",
+                              "RUS",
+                              "RWA",
+                              "BLM",
+                              "SHN",
+                              "KNA",
+                              "LCA",
+                              "MAF",
+                              "SPM",
+                              "VCT",
+                              "WSM",
+                              "SMR",
+                              "STP",
+                              "SAU",
+                              "SEN",
+                              "SRB",
+                              "SYC",
+                              "SLE",
+                              "SGP",
+                              "SXM",
+                              "SVK",
+                              "SVN",
+                              "SLB",
+                              "ZAF",
+                              "SGS",
+                              "SSD",
+                              "ESP",
+                              "LKA",
+                              "SDN",
+                              "SUR",
+                              "SJM",
+                              "SWZ",
+                              "SWE",
+                              "CHE",
+                              "SYR",
+                              "TWN",
+                              "TJK",
+                              "TZA",
+                              "THA",
+                              "TLS",
+                              "TGO",
+                              "TKL",
+                              "TON",
+                              "TTO",
+                              "TUN",
+                              "TUR",
+                              "TKM",
+                              "TCA",
+                              "TUV",
+                              "UGA",
+                              "UKR",
+                              "ARE",
+                              "GBR",
+                              "USA",
+                              "URY",
+                              "UZB",
+                              "VUT",
+                              "VEN",
+                              "VNM",
+                              "VIR",
+                              "VGB",
+                              "WLF",
+                              "YEM",
+                              "ZMB",
+                              "ZWE",
+                              "ISL"
+                            ]
+                          },
+                          "firstName": {
+                            "description": "First name of the recipient.",
+                            "type": "string"
+                          },
+                          "isHideCompany": {
+                            "description": "Do not display the company name in the document address window. Possible values: true, false.",
+                            "type": "boolean"
+                          },
+                          "isHideName": {
+                            "description": "Do not display the title, first name and last name in the document address window. Possible values: true, false.",
+                            "type": "boolean"
+                          },
+                          "lastName": {
+                            "description": "Last name of the recipient.",
+                            "type": "string"
+                          },
+                          "zip": {
+                            "description": "The postal code of the address.",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type"
+                        ]
+                      }
+                    }
                   },
                   "altName": {
                     "description": "An alternative name for this person (for organizational chart). This can contain localized text. To add values in multiple languages, use the XML format like this: <values><de>German text</de><en>English text</en></values>",
@@ -32562,7 +33415,46 @@
                   },
                   "bankAccounts": {
                     "description": "A list of bank accounts (IBAN, BIC). This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "iban": {
+                            "description": "The IBAN (International Bank Account Number).",
+                            "type": "string",
+                            "maxLength": 32
+                          },
+                          "type": {
+                            "description": "The type of bank account, i.e. what is the bank account used for? Possible values: DEFAULT, ORDER, SALARY, HISTORICAL, OTHER.",
+                            "type": "string",
+                            "enum": [
+                              "DEFAULT",
+                              "ORDER",
+                              "SALARY",
+                              "HISTORICAL",
+                              "OTHER"
+                            ]
+                          },
+                          "bic": {
+                            "description": "The BIC (Business Identifier Code) of your bank.",
+                            "type": "string",
+                            "maxLength": 11
+                          },
+                          "notes": {
+                            "description": "Some optional notes.",
+                            "type": "string",
+                            "maxLength": 255
+                          }
+                        },
+                        "required": [
+                          "iban",
+                          "type"
+                        ]
+                      }
+                    }
                   },
                   "bankData": {
                     "description": "Unstructured bank information, if IBAN/BIC not available. Otherwise use bankAccounts .",
@@ -32584,7 +33476,52 @@
                   },
                   "children": {
                     "description": "A list of children. isEmployee or isFamily must be set. This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "description": "Name of the child (first and last name).",
+                            "type": "string"
+                          },
+                          "dateBenefitBegin": {
+                            "description": "Child benefit start date (used for salary statements). Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "dateBenefitEnd": {
+                            "description": "Child benefit end date (used for salary statements). Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "dateBirth": {
+                            "description": "The child's date of birth. Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "dateInEducation": {
+                            "description": "Date since child is in education (used for salary statements). Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "notes": {
+                            "description": "Some optional notes.",
+                            "type": "string",
+                            "maxLength": 255
+                          }
+                        },
+                        "required": [
+                          "name"
+                        ]
+                      }
+                    }
                   },
                   "color": {
                     "description": "The color to use for this person in the organizational chart. Leave empty for white. Possible values: BLUE, GREEN, RED, YELLOW, ORANGE, BLACK, GRAY, BROWN, VIOLET, PINK.",
@@ -32604,7 +33541,47 @@
                   },
                   "contacts": {
                     "description": "A list of contact information (e-mail, phone, url, etc.). This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "address": {
+                            "description": "The actual contact information (e-mail address, phone number, etc.).",
+                            "type": "string"
+                          },
+                          "type": {
+                            "description": "The type of contact information. Possible values: EMAIL_INVOICE, EMAIL_WORK, EMAIL_PRIVATE, PHONE_RECEPTION, PHONE_WORK, PHONE_PRIVATE, MOBILE_WORK, MOBILE_PRIVATE, FAX, WEBSITE, MESSENGER, OTHER.",
+                            "type": "string",
+                            "enum": [
+                              "EMAIL_INVOICE",
+                              "EMAIL_WORK",
+                              "EMAIL_PRIVATE",
+                              "PHONE_RECEPTION",
+                              "PHONE_WORK",
+                              "PHONE_PRIVATE",
+                              "MOBILE_WORK",
+                              "MOBILE_PRIVATE",
+                              "FAX",
+                              "WEBSITE",
+                              "MESSENGER",
+                              "OTHER"
+                            ]
+                          },
+                          "notes": {
+                            "description": "Some optional short notes.",
+                            "type": "string",
+                            "maxLength": 255
+                          }
+                        },
+                        "required": [
+                          "address",
+                          "type"
+                        ]
+                      }
+                    }
                   },
                   "custom": {
                     "description": "Custom field values. They are stored as XML in this parameter. Example: <values><customField1>My value</customField1><customField2>[\"value 1\",\"value 2\"]</customField2></values> . Look up custom field variable names (e.g. \"customField1\") in the Custom fields API.",
@@ -32634,7 +33611,31 @@
                   },
                   "insuranceContracts": {
                     "description": "A list of insurance contracts, if isInsurance is set. This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "typeId": {
+                            "description": "ID of the insurance type (e.g. AHV, BVG, etc.).",
+                            "type": "number"
+                          },
+                          "contractNr": {
+                            "description": "Number of the contract with the insurance company.",
+                            "type": "string"
+                          },
+                          "subNr": {
+                            "description": "Optional sub-contract number, if sub-contracts exist.",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "typeId"
+                        ]
+                      }
+                    }
                   },
                   "insuranceMemberNr": {
                     "description": "Member number (for insurance). isInsurance must be set.",
@@ -32710,7 +33711,36 @@
                   },
                   "servicePeriods": {
                     "description": "A list of service periods (entry and exit of the employee). isEmployee must be set. This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dateEntry": {
+                            "description": "The entry date. Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "dateExit": {
+                            "description": "The exit date. Leave empty if this is the current period. Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "notes": {
+                            "description": "Some optional notes.",
+                            "type": "string",
+                            "maxLength": 255
+                          }
+                        },
+                        "required": [
+                          "dateEntry"
+                        ]
+                      }
+                    }
                   },
                   "ssn": {
                     "description": "Social security number of the employee. isEmployee must be set.",
@@ -40159,7 +41189,29 @@
                   },
                   "codes": {
                     "description": "A list of codes (like A1, A2, etc.). This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "description": "Insurance code (like A1, A2, etc.)",
+                            "type": "string",
+                            "maxLength": 10
+                          },
+                          "description": {
+                            "description": "An optional description. This can contain localized text. To add values in multiple languages, use the XML format like this: <values><de>German text</de><en>English text</en></values>",
+                            "type": "string",
+                            "maxLength": 100
+                          }
+                        },
+                        "required": [
+                          "name"
+                        ]
+                      }
+                    }
                   },
                   "description": {
                     "description": "An optional description. This can contain localized text. To add values in multiple languages, use the XML format like this: <values><de>German text</de><en>English text</en></values>",
@@ -40498,7 +41550,29 @@
                   },
                   "codes": {
                     "description": "A list of codes (like A1, A2, etc.). This is a JSON array [{...},{...},...] with the following parameters:",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "description": "Insurance code (like A1, A2, etc.)",
+                            "type": "string",
+                            "maxLength": 10
+                          },
+                          "description": {
+                            "description": "An optional description. This can contain localized text. To add values in multiple languages, use the XML format like this: <values><de>German text</de><en>English text</en></values>",
+                            "type": "string",
+                            "maxLength": 100
+                          }
+                        },
+                        "required": [
+                          "name"
+                        ]
+                      }
+                    }
                   },
                   "description": {
                     "description": "An optional description. This can contain localized text. To add values in multiple languages, use the XML format like this: <values><de>German text</de><en>English text</en></values>",
@@ -44497,7 +45571,21 @@
                   },
                   "attachments": {
                     "description": "List of file attachments (overrides existing attachments).",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "fileId": {
+                            "description": "ID of the file to attach. See File .",
+                            "type": "number"
+                          }
+                        },
+                        "required": []
+                      }
+                    }
                   },
                   "custom": {
                     "description": "New values for custom fields.",
@@ -52311,11 +53399,79 @@
                   },
                   "components": {
                     "description": "The components of the tax code, up to two possible.",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "accountId": {
+                            "description": "ID of the account where the tax amounts are being collected. See Account .",
+                            "type": "number"
+                          },
+                          "applyRule": {
+                            "description": "The application rule, on which account (debit or credit side) the tax is applied. Possible values: CREDIT, DEBIT, REVENUE, EXPENSE, LEGACY_REV, LEGACY_EXP.",
+                            "type": "string",
+                            "enum": [
+                              "CREDIT",
+                              "DEBIT",
+                              "REVENUE",
+                              "EXPENSE",
+                              "LEGACY_REV",
+                              "LEGACY_EXP"
+                            ]
+                          },
+                          "calcType": {
+                            "description": "The calculation basis, how the tax is calculated (either based on the net amount or gross amount). Possible values: NET, GROSS.",
+                            "type": "string",
+                            "enum": [
+                              "NET",
+                              "GROSS"
+                            ]
+                          },
+                          "code": {
+                            "description": "One or multiple codes, comma-separated, corresponding to the code on the tax return form from the ESTV. Example: 200,303",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "accountId",
+                          "applyRule",
+                          "calcType"
+                        ]
+                      }
+                    }
                   },
                   "rates": {
                     "description": "Tax rates that are valid from a given date. Add a new tax rate here if the official tax rate changes. Exactly one tax rate must exist without a valid from date.",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "percentage": {
+                            "description": "The tax rate percentage (e.g. 8.1).",
+                            "type": "number"
+                          },
+                          "dateValid": {
+                            "description": "The date from which the tax rate will be used. One of the tax rates must have no dateValid set, that is the fallback tax rate. Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "percentageFlat": {
+                            "description": "The net/flat tax rate percentage (e.g. 5.9), if net or flat tax rate method is used, otherwise leave empty.",
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "percentage"
+                        ]
+                      }
+                    }
                   },
                   "description": {
                     "description": "A description for the tax code. This can contain localized text. To add values in multiple languages, use the XML format like this: <values><de>German text</de><en>English text</en></values>",
@@ -52843,7 +53999,49 @@
                   },
                   "components": {
                     "description": "The components of the tax code, up to two possible.",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "accountId": {
+                            "description": "ID of the account where the tax amounts are being collected. See Account .",
+                            "type": "number"
+                          },
+                          "applyRule": {
+                            "description": "The application rule, on which account (debit or credit side) the tax is applied. Possible values: CREDIT, DEBIT, REVENUE, EXPENSE, LEGACY_REV, LEGACY_EXP.",
+                            "type": "string",
+                            "enum": [
+                              "CREDIT",
+                              "DEBIT",
+                              "REVENUE",
+                              "EXPENSE",
+                              "LEGACY_REV",
+                              "LEGACY_EXP"
+                            ]
+                          },
+                          "calcType": {
+                            "description": "The calculation basis, how the tax is calculated (either based on the net amount or gross amount). Possible values: NET, GROSS.",
+                            "type": "string",
+                            "enum": [
+                              "NET",
+                              "GROSS"
+                            ]
+                          },
+                          "code": {
+                            "description": "One or multiple codes, comma-separated, corresponding to the code on the tax return form from the ESTV. Example: 200,303",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "accountId",
+                          "applyRule",
+                          "calcType"
+                        ]
+                      }
+                    }
                   },
                   "id": {
                     "description": "The ID of the tax code to update.",
@@ -52851,7 +54049,33 @@
                   },
                   "rates": {
                     "description": "Tax rates that are valid from a given date. Add a new tax rate here if the official tax rate changes. Exactly one tax rate must exist without a valid from date.",
-                    "type": "string"
+                    "type": "string",
+                    "contentMediaType": "application/json",
+                    "contentSchema": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "percentage": {
+                            "description": "The tax rate percentage (e.g. 8.1).",
+                            "type": "number"
+                          },
+                          "dateValid": {
+                            "description": "The date from which the tax rate will be used. One of the tax rates must have no dateValid set, that is the fallback tax rate. Format: YYYY-MM-DD. Example: 2020-01-15 .",
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-07-27"
+                          },
+                          "percentageFlat": {
+                            "description": "The net/flat tax rate percentage (e.g. 5.9), if net or flat tax rate method is used, otherwise leave empty.",
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "percentage"
+                        ]
+                      }
+                    }
                   },
                   "description": {
                     "description": "A description for the tax code. This can contain localized text. To add values in multiple languages, use the XML format like this: <values><de>German text</de><en>English text</en></values>",
