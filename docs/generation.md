@@ -1,9 +1,7 @@
 # How the SDK is generated
 
-CashCtrl publishes no OpenAPI spec and no official SDK. This repo builds both
+CashCtrl publishes no OpenAPI spec and no official SDK, so this repo builds both
 from the published HTML reference plus live read-only probing.
-
-## How generation works
 
 ```
 scripts/scrape-docs.ts   HTML reference -> spec/api.json        376 endpoints
@@ -23,20 +21,27 @@ deno task build:npm   # build the npm package into ./npm
 deno task ci          # everything CI runs
 ```
 
-### Staying in sync with upstream
+## Staying in sync with upstream
 
 CashCtrl ships API changes without announcing them, so
 [`.github/workflows/upstream.yml`](../.github/workflows/upstream.yml) re-scrapes
-their reference every Monday, regenerates, and opens a PR when anything moved.
-`scripts/diff-spec.ts` turns the change into a readable summary (endpoints added
-or removed, parameters added, removed or retyped) that becomes the PR body, so
-the generated-code diff never has to be read directly.
+their reference every Monday, re-probes response shapes, regenerates, and opens
+a PR when anything moved. `scripts/diff-spec.ts` turns the change into a
+readable summary (endpoints added or removed, parameters added, removed or
+retyped) that becomes the PR body, so the generated-code diff never has to be
+read directly.
+
+The probe step needs the `CASHCTRL_TEST_DOMAINID` / `CASHCTRL_TEST_APIKEY`
+secrets and is skipped without them, in which case the PR body asks for a manual
+`deno task probe` instead. Without it, regeneration reuses the old
+`spec/responses.json` and any endpoint CashCtrl has added comes out typed
+`unknown`.
 
 ```sh
 deno run --allow-read --allow-write scripts/diff-spec.ts old.json new.json
 ```
 
-### How probing reaches parameterised endpoints
+## How probing reaches parameterised endpoints
 
 Most read endpoints need an id, so the prober harvests them: it calls the `list`
 and `tree` endpoints first and reuses their ids for the sibling `read.json`.
