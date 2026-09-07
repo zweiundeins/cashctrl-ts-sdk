@@ -88,6 +88,28 @@ below.
 The three `mail` endpoints send real e-mail, so they are skipped unless `--mail`
 gives them a recipient; without it the run reaches 189/192.
 
+#### In CI
+
+[`.github/workflows/write-test.yml`](../.github/workflows/write-test.yml) runs
+the suite weekly and on demand, against the organisation named by the
+`CASHCTRL_TEST_DOMAINID` / `CASHCTRL_TEST_APIKEY` repository secrets. Not on
+push: it writes, it takes a few minutes and several hundred calls against a
+third party, and two concurrent runs would interleave — the settings suite flips
+an organisation-wide setting and restores it. A `concurrency` group keeps it to
+one at a time, and a queued run is dropped rather than cancelled, since
+cancelling mid-suite would kill it between a create and its cleanup.
+
+The year-end suite stays out of the scheduled run, because each pass leaves a
+fiscal period that can never be deleted. The manual trigger has an `all` input
+for when the year-end code itself changes.
+
+Two endpoints fail for reasons on CashCtrl's side. They are listed in
+`KNOWN_FAILURES` with what was tried, reported separately from real failures,
+and do not fail the run — otherwise the suite could never be green and a red
+result would stop meaning anything. The check runs both ways: an entry that
+_stops_ failing also fails the run, because an endpoint that starts working is
+news, and a stale entry would mask a real regression later.
+
 #### What it costs to run
 
 Two suites are deliberately destructive, which is why they need a disposable

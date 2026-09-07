@@ -90,6 +90,39 @@ export function recordingFetch(
   };
 }
 
+/**
+ * Steps that fail for reasons on CashCtrl's side, not ours.
+ *
+ * Without this the suite can never be green, so a scheduled run says nothing
+ * useful: a reader learns to expect red and stops looking. Keyed on the
+ * `<suite>: <label>` prefix the run reports.
+ *
+ * The check runs both ways. An entry that does NOT fail is reported and fails
+ * the run, because an endpoint that starts working is news - and an entry left
+ * here after upstream fixes it would quietly mask a real regression later.
+ */
+export interface KnownFailure {
+  /** `<suite>: <label>`, matched as a prefix so the detail can vary. */
+  step: string;
+  /** Why it fails upstream, and what was tried. */
+  reason: string;
+}
+
+export const KNOWN_FAILURES: KnownFailure[] = [
+  {
+    step: "persons: person/import execute",
+    reason:
+      "Answers 'An unexpected error occurred. Please contact support.' after " +
+      "create and mapping both succeed. Tried comma and semicolon " +
+      "delimiters, LF and CRLF, three and four columns, one and two data " +
+      "rows. Reported to CashCtrl 2026-09-07.",
+  },
+  {
+    step: "inventory: inventory/article/import execute",
+    reason: "Same failure as person/import/execute, same report.",
+  },
+];
+
 export interface Suite {
   name: string;
   /**

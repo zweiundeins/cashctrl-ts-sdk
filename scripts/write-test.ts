@@ -25,6 +25,7 @@ import { CashCtrl } from "../src/mod.ts";
 import {
   allWritePaths,
   Ctx,
+  KNOWN_FAILURES,
   recordingFetch,
   resolveTarget,
 } from "./write-harness.ts";
@@ -131,9 +132,42 @@ if (ctx.gaps.length) {
   for (const g of ctx.gaps) console.log(`  ${g}`);
 }
 
-if (ctx.failures.length) {
-  console.log(`\nfailures (${ctx.failures.length}):`);
-  for (const f of ctx.failures) console.log(`  ${f}`);
+// A known failure only counts as "still broken" when its suite actually ran;
+// a --only run that skips it proves nothing either way. Neither does a dry
+// run: the stub answers every write with success, so it can say nothing about
+// what CashCtrl does.
+const ranSuites = new Set(selected.map((s) => s.name));
+const applicable = dryRun
+  ? []
+  : KNOWN_FAILURES.filter((k) => ranSuites.has(k.step.split(":")[0]));
+const isKnown = (failure: string) =>
+  applicable.some((k) => failure.startsWith(k.step));
+
+const expected = ctx.failures.filter(isKnown);
+const unexpected = ctx.failures.filter((f) => !isKnown(f));
+const fixedUpstream = applicable.filter((k) =>
+  !ctx.failures.some((f) => f.startsWith(k.step))
+);
+
+if (expected.length) {
+  console.log(
+    `\nfailing upstream, expected (${expected.length}) - see KNOWN_FAILURES:`,
+  );
+  for (const f of expected) console.log(`  ${f}`);
+}
+
+if (unexpected.length) {
+  console.log(`\nfailures (${unexpected.length}):`);
+  for (const f of unexpected) console.log(`  ${f}`);
+}
+
+if (fixedUpstream.length) {
+  console.log(
+    `\n!! these are listed as failing upstream but passed ` +
+      `(${fixedUpstream.length}). CashCtrl fixed them; drop them from ` +
+      `KNOWN_FAILURES so a real regression cannot hide behind the entry:`,
+  );
+  for (const k of fixedUpstream) console.log(`  ${k.step}`);
 }
 
 if (ctx.undeletable.length) {
@@ -151,4 +185,13 @@ if (ctx.leaked.length) {
   for (const l of ctx.leaked) console.log(`  ${l}`);
 }
 
-Deno.exit(ctx.failed || ctx.leaked.length ? 1 : 0);
+const bad = unexpected.length + fixedUpstream.length + ctx.leaked.length;
+console.log(
+  bad
+    ? `\nFAIL: ${unexpected.length} unexpected, ${fixedUpstream.length} ` +
+      `no longer failing, ${ctx.leaked.length} not cleaned up`
+    : `\nOK${
+      expected.length ? ` (${expected.length} known upstream failures)` : ""
+    }`,
+);
+Deno.exit(bad ? 1 : 0);

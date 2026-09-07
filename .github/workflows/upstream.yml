@@ -51,8 +51,10 @@ jobs:
         id: probe
         if: steps.diff.outputs.changed == 'true' && env.CASHCTRL_APIKEY != ''
         env:
-          CASHCTRL_APIKEY: ${{ secrets.CASHCTRL_APIKEY }}
-          CASHCTRL_DOMAINID: ${{ secrets.CASHCTRL_DOMAINID }}
+          # The probe script reads the unprefixed names; the secrets carry the
+          # TEST_ prefix so nobody can mistake them for production credentials.
+          CASHCTRL_APIKEY: ${{ secrets.CASHCTRL_TEST_APIKEY }}
+          CASHCTRL_DOMAINID: ${{ secrets.CASHCTRL_TEST_DOMAINID }}
         run: |
           deno run --allow-read --allow-write --allow-net --allow-env \
             scripts/probe-api.ts
@@ -90,8 +92,8 @@ jobs:
               echo "- [ ] Run \`deno task probe\` against an organisation so new"
               echo "      endpoints get real response types instead of \`unknown\`,"
               echo "      then \`deno task generate\` and push to this branch."
-              echo "      (Set the CASHCTRL_APIKEY and CASHCTRL_DOMAINID repo"
-              echo "      secrets to have this job do it.)"
+              echo "      (Set the CASHCTRL_TEST_APIKEY and"
+              echo "      CASHCTRL_TEST_DOMAINID repo secrets to automate it.)"
             fi
             echo "- [ ] Note anything breaking (removed endpoints, params that"
             echo "      became mandatory) in \`CHANGELOG.md\`."

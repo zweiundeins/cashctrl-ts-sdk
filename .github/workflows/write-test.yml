@@ -1,0 +1,78 @@
+name: Write suite
+
+# Drives every write endpoint against a live organisation, which is the only
+# way to catch the generated client drifting from what CashCtrl accepts. The
+# contract test proves we send what the docs describe; only this proves the
+# docs were right.
+#
+# Deliberately not on push or pull_request:
+#
+#   - It writes. Against a disposable organisation that is fine, but two runs
+#     at once would interleave — the settings suite flips an organisation-wide
+#     setting and restores it, so a concurrent pair could leave it wrong. Hence
+#     the concurrency group, and hence not running it on every push.
+#   - It takes a few minutes and several hundred API calls against a third
+#     party. Neither belongs in the feedback loop for a typo fix.
+#
+# The year-end suite stays out (it needs --all): completing a fiscal period
+# makes it permanently undeletable, so a scheduled run would add one a week.
+# Run it by hand from the CashCtrl UI's disposable organisation when the
+# year-end code changes.
+
+on:
+  schedule:
+    - cron: "0 7 * * 1" # Mondays 07:00 UTC, an hour after the upstream scrape
+  workflow_dispatch:
+    inputs:
+      all:
+        description: "Include the year-end suite (leaves a fiscal period behind)"
+        type: boolean
+        default: false
+
+# One run at a time. A queued run is dropped rather than cancelled mid-write:
+# cancel-in-progress would kill a suite between its create and its cleanup.
+concurrency:
+  group: write-suite
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  write-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # Without the secrets there is nothing to run against. Fail loudly rather
+      # than skip: a scheduled job that quietly does nothing is worse than one
+      # that is visibly not set up.
+      - name: Check the target is configured
+        env:
+          ORG: ${{ secrets.CASHCTRL_TEST_DOMAINID }}
+        run: |
+          if [ -z "$ORG" ]; then
+            echo "::error::CASHCTRL_TEST_DOMAINID and CASHCTRL_TEST_APIKEY " \
+                 "must be set to a disposable organisation."
+            exit 1
+          fi
+
+      # The stub run needs no credentials and catches a suite that broke its
+      # own chain, which would otherwise show up as a confusing live failure.
+      - name: Dry run
+        run: |
+          deno run --allow-read --allow-net --allow-env \
+            scripts/write-test.ts --dry-run --all --mail=ci@example.invalid
+
+      - name: Drive every write endpoint
+        env:
+          CASHCTRL_TEST_DOMAINID: ${{ secrets.CASHCTRL_TEST_DOMAINID }}
+          CASHCTRL_TEST_APIKEY: ${{ secrets.CASHCTRL_TEST_APIKEY }}
+        run: |
+          deno run --allow-read --allow-net --allow-env \
+            scripts/write-test.ts \
+            --org="$CASHCTRL_TEST_DOMAINID" \
+            ${{ inputs.all && '--all' || '' }}
