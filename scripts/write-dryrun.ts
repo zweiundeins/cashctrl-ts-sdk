@@ -129,7 +129,12 @@ function readGet(path: string, params: URLSearchParams): unknown {
       return { data: record };
     }
     case "/api/v1/salary/statement/list.json":
-      return { data: [{ id: 9001, personId: 5001 }] };
+      // templateId matters: the salary suite reuses an existing statement's
+      // template rather than minting one, because a used template is
+      // undeletable.
+      return { data: [{ id: 9001, personId: 5001, templateId: 9201 }] };
+    case "/api/v1/salary/template/list.json":
+      return { data: [{ id: 9201, name: "Base", isInactive: false }] };
     case "/api/v1/salary/bookentry/list.json":
       return { data: [{ id: 9101 }] };
     case "/api/v1/fiscalperiod/read.json":

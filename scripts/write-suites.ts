@@ -1595,31 +1595,37 @@ const salary: Suite = {
       unknown
     >[];
     const salaryLayoutId = salaryLayouts[0]?.id as number | undefined;
-    const templateId = salaryLayoutId === undefined
-      ? (ctx.check("salary/template: a layout to attach", false), undefined)
-      : await crud(
+
+    // The template CRUD case is deliberately not the template the statement
+    // below uses. A template a statement has touched can never be deleted
+    // again, so pairing the two would leave one behind on every run - and a
+    // suite that litters is a suite nobody wants on a schedule.
+    if (salaryLayoutId === undefined) {
+      ctx.check("salary/template: a layout to attach", false);
+    } else {
+      await crud(
         ctx,
         "salary/template",
         cc.salary.template as unknown as Crud,
         { name: `${t}-stpl`, layoutId: salaryLayoutId },
         { name: `${t}-stpl2` },
-        // A template a statement has used can never be deleted again.
-        (id) =>
-          cc.salary.template.update({
-            id,
-            name: `${t}-stpl2`,
-            layoutId: salaryLayoutId,
-            isInactive: true,
-          }),
       );
+    }
 
-    // Salary statements are licensed per employee per period, so creating a
-    // fresh person here burns quota that never comes back. Reuse an employee
-    // the organisation already pays.
+    // Salary statements are licensed per employee per period, and a used
+    // template is undeletable, so the statement reuses what the organisation
+    // already has rather than minting either.
     const existingStatements = await cc.salary.statement.list() as Record<
       string,
       unknown
     >[];
+    const existingTemplates = await cc.salary.template.list() as Record<
+      string,
+      unknown
+    >[];
+    const templateId =
+      existingStatements[0]?.templateId as number | undefined ??
+        existingTemplates.find((x) => !x.isInactive)?.id as number | undefined;
     const personId = existingStatements[0]?.personId as number | undefined ??
       await createPayee(ctx);
     if (
