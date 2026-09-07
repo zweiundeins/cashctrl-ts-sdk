@@ -49,6 +49,19 @@ worked before, because neither worked before.
   `CASHCTRL_DOMAINID`/`CASHCTRL_APIKEY` or when the target is not repeated as
   `--org=`. The year-end suite is opt-in behind `--all`, because completing a
   fiscal period makes it permanently undeletable.
+- The write suite runs weekly and on demand in CI
+  (`.github/workflows/write-test.yml`), against the organisation named by the
+  `CASHCTRL_TEST_DOMAINID`/`CASHCTRL_TEST_APIKEY` secrets. Not on push: it
+  writes, and two concurrent runs would interleave. The two endpoints that fail
+  on CashCtrl's side are listed in `KNOWN_FAILURES` so the run can still be
+  green — and an entry that stops failing fails the run, so a stale one cannot
+  mask a regression.
+- The weekly upstream job re-probes response shapes when those secrets are
+  present, instead of asking a human to do it in the PR body. Without it,
+  regeneration reuses the old `spec/responses.json` and any endpoint CashCtrl
+  added comes out typed `unknown`.
+- `README.md` is now an entry point, with the detail in `docs/testing.md`,
+  `docs/api-notes.md` and `docs/generation.md`.
 
 ### Fixed
 
