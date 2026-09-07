@@ -34,7 +34,8 @@
     "build:npm": "deno run -A scripts/build-npm.ts",
     "check": "deno check src/mod.ts scripts/*.ts && deno lint && deno fmt --check",
     "ci": "deno task check && deno task test && deno task test:compat && deno publish --dry-run --allow-dirty",
-    "roundtrip": "deno run --allow-read --allow-net --allow-env --env-file scripts/roundtrip-test.ts"
+    "roundtrip": "deno run --allow-read --allow-net --allow-env --env-file scripts/roundtrip-test.ts",
+    "write-test": "deno run --allow-read --allow-net --allow-env --env-file scripts/write-test.ts"
   },
   "lint": {
     "include": [
