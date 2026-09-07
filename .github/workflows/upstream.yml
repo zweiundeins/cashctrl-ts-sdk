@@ -36,10 +36,28 @@ jobs:
           fi
           cat /tmp/summary.md
 
-      # Regenerating uses the OLD spec/responses.json, so response types for
-      # any brand-new endpoint fall back to `unknown` until someone runs
-      # `deno task probe` against a real organisation. That is called out in
-      # the PR body rather than silently accepted.
+      # Without this, regenerating uses the OLD spec/responses.json and the
+      # response types for any brand-new endpoint fall back to `unknown`.
+      #
+      # Probing is read-only by construction: it calls only GET endpoints whose
+      # final segment is on a verb allowlist, and hard-denies the two GETs that
+      # mutate plus every document read. It records field names and types, never
+      # values. Point it at a disposable organisation with a read-only role
+      # anyway — there is no reason for a scheduled job to touch real books.
+      #
+      # Skipped when the secret is absent, so forks and PRs still work and the
+      # PR body keeps asking a human to do it.
+      - name: Probe response shapes
+        id: probe
+        if: steps.diff.outputs.changed == 'true' && env.CASHCTRL_APIKEY != ''
+        env:
+          CASHCTRL_APIKEY: ${{ secrets.CASHCTRL_APIKEY }}
+          CASHCTRL_DOMAINID: ${{ secrets.CASHCTRL_DOMAINID }}
+        run: |
+          deno run --allow-read --allow-write --allow-net --allow-env \
+            scripts/probe-api.ts
+          echo "probed=true" >> "$GITHUB_OUTPUT"
+
       - name: Regenerate the SDK
         if: steps.diff.outputs.changed == 'true'
         run: deno task generate
@@ -65,9 +83,16 @@ jobs:
             echo "## Before merging"
             echo
             echo "- [ ] Review the \`spec/api.json\` diff, which is the real change."
-            echo "- [ ] Run \`deno task probe\` against an organisation so new"
-            echo "      endpoints get real response types instead of \`unknown\`,"
-            echo "      then \`deno task generate\` and push to this branch."
+            if [ "${{ steps.probe.outputs.probed }}" = "true" ]; then
+              echo "- [x] Response shapes were re-probed by this job, so new"
+              echo "      endpoints already carry real types."
+            else
+              echo "- [ ] Run \`deno task probe\` against an organisation so new"
+              echo "      endpoints get real response types instead of \`unknown\`,"
+              echo "      then \`deno task generate\` and push to this branch."
+              echo "      (Set the CASHCTRL_APIKEY and CASHCTRL_DOMAINID repo"
+              echo "      secrets to have this job do it.)"
+            fi
             echo "- [ ] Note anything breaking (removed endpoints, params that"
             echo "      became mandatory) in \`CHANGELOG.md\`."
           } > /tmp/pr-body.md
