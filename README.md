@@ -215,6 +215,7 @@ deno task index       # rebuild the search index
 deno task scrape      # re-scrape the docs (--refresh bypasses the cache)
 deno task probe       # re-probe response shapes (needs an API key)
 deno task test        # unit tests, no network
+deno task write-test  # every write endpoint, disposable organisation only
 deno task build:npm   # build the npm package into ./npm
 deno task ci          # everything CI runs
 ```
@@ -269,12 +270,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 Be clear-eyed about what is and is not verified.
 
-| Layer                               | Coverage           | How                                      |
-| ----------------------------------- | ------------------ | ---------------------------------------- |
-| Request construction                | **376/376 (100%)** | `tests/contract_test.ts`, mock transport |
-| Response shapes                     | 108/376 (29%)      | live read-only probing, one organisation |
-| Full CRUD round-trips               | 8 resources        | `scripts/roundtrip-test.ts`, live writes |
-| Accounting writes (orders, journal) | **0%**             | needs a disposable organisation          |
+| Layer                  | Coverage           | How                                      |
+| ---------------------- | ------------------ | ---------------------------------------- |
+| Request construction   | **376/376 (100%)** | `tests/contract_test.ts`, mock transport |
+| Response shapes        | 108/376 (29%)      | live read-only probing, one organisation |
+| Full CRUD round-trips  | 8 resources        | `scripts/roundtrip-test.ts`, live writes |
+| Write endpoints driven | **192/192 (100%)** | `scripts/write-test.ts`, live writes     |
 
 `tests/contract_test.ts` calls every generated method with every documented
 parameter and asserts the HTTP verb, the exact URL path, that each parameter
@@ -314,11 +315,111 @@ deno task roundtrip     # 8 resources, 48 assertions, cleans up after itself
 ```
 
 Covering orders, journal entries and the rest of the accounting tier means
-pointing this at a **disposable trial organisation**, not your books.
+pointing this at a **disposable trial organisation**, not your books. That is
+what `scripts/write-test.ts` is for.
 
-**What still is not proven:** no order, journal entry, person or article has
-ever been created through this SDK against a real server. Those paths are
-typechecked and contract-tested, but never executed. Treat them as unproven.
+### The write suite
+
+`deno task write-test` drives the **write half of the API** - all 192 POST
+endpoints - in ten dependency-ordered suites: master data, the chart of
+accounts, file upload, people, inventory, journal entries, orders, the
+bank-statement importer, payroll, and year-end.
+
+It is **not** safe to point at real books, and is built so it cannot be. It
+reads `CASHCTRL_TEST_DOMAINID` and `CASHCTRL_TEST_APIKEY` and never
+`CASHCTRL_DOMAINID`/`CASHCTRL_APIKEY`, refuses to start if the two resolve to
+the same organisation, and requires the target to be repeated on the command
+line:
+
+```sh
+deno task write-test --dry-run                    # offline, coverage only
+deno task write-test --org=<organisation>          # the real thing
+deno task write-test --org=<org> --only=orders     # one suite while iterating
+deno task write-test --org=<org> --mail=me@example.com   # include the 3 mail endpoints
+```
+
+Every call goes through the generated method rather than raw HTTP, and a
+recording `fetch` collects the paths actually reached, so the run ends with a
+coverage report measured against every POST in `spec/api.json` instead of a
+claim. Each suite tears down what it created, last created first.
+
+Last full run against a disposable organisation: **265 assertions passed, 2
+failed, 192/192 endpoints reached**. The two failures are server-side, see
+below.
+
+The three `mail` endpoints send real e-mail, so they are skipped unless `--mail`
+gives them a recipient; without it the run reaches 189/192.
+
+#### What it costs to run
+
+Two suites are deliberately destructive, which is why they need a disposable
+organisation. `bankimport` executes an import that posts real journal entries;
+the suite deletes them again. `yearend` creates its own fiscal period - the year
+before the earliest existing one, so it never touches the year anybody is
+booking into - completes it, reopens it and then deletes it.
+
+That last step does not always work: **a fiscal period that has been completed
+can never be deleted again**, reopening included, so every full run leaves one
+extra fiscal period behind. It is renamed `<tag>-DELETE-ME` on the way out. The
+same is true of a depreciated fixed asset and of a salary template a statement
+has used. All three are reported at the end under "left behind" so they are
+never mistaken for a leak.
+
+#### What the write paths actually revealed
+
+Running the whole write surface against a live organisation turned up places
+where CashCtrl's published reference and its behaviour disagree. The suite works
+around each one and says so; the workarounds are worth knowing about because
+they apply to any caller, not just this test.
+
+**Bugs in this SDK, inherited from the docs** - these three are reached only
+through `cc.http` because the generated method cannot express the request:
+
+- `customfield/reorder` and `customfield/group/reorder` require a `type`
+  parameter that appears nowhere in the reference. Without it the server answers
+  "Type is missing", so the generated methods can never succeed.
+- `setting/read.json` answers with a flat object rather than the `{ data: ... }`
+  envelope every other read uses, so the generated `read()` unwraps a key that
+  is not there and returns `undefined`.
+- `setting/update` has no documented parameters, so the generated method has
+  none to send. Settings cannot be changed through the typed surface.
+
+**Parameters documented as TEXT that are really JSON.** The generated type says
+`string`; passing a string produces a 500 or a validation error. Encode with
+`JSON.stringify`: `tax.components`, `tax.rates`, `person.addresses`,
+`person.bankAccounts`.
+
+**Parameters documented as optional that the server requires**: `parentId` on
+`account/category/create`; `description` on `tax/create`; `layoutId` on
+`order/category/create` and `salary/template/create`; `date` on
+`order/bookentry/update` and `salary/bookentry/create`; `nr` on
+`inventory/article/create`, `order/create` and `salary/statement/create`; `nr`
+and `purchaseCreditId` on `inventory/asset/create`; and all four date fields on
+`fiscalperiod/update`, whose only documented requirement is `id`.
+
+**Server-side faults**, reported as failures rather than worked around:
+
+- `notifyType: "NONE"` is a documented value for all three `update_recurrence`
+  endpoints and makes every one of them answer 500. Omitting the parameter is
+  equivalent and works.
+- `salary/type/create` answers 500 for the documented required set
+  (`categoryId`, `name`, `number`, `type`). Only a near-complete payload gets
+  through, so the suite clones an existing type and renames its variables.
+- `person/import/execute` and `inventory/article/import/execute` answer "An
+  unexpected error occurred" for every file shape tried, after `create` and
+  `mapping` both succeed. These are the 2 failures in the run above.
+
+**Undocumented behaviour worth knowing**: the CSV bank importer rejects a
+three-column file outright and needs a fourth; `mapping` takes the importer's
+own field constants (`COMPANY`, `NAME_EN`, ...) from the `mapping_combo`
+endpoint, not field names on the entity; an order must be in a status flagged
+`isBook` before it accepts a book entry or a payment, and the `amount` parameter
+does not override that; and `file/prepare` returns
+`{ data: [{ fileId, writeUrl }] }` while being typed as the generic
+`WriteEnvelope`.
+
+**What is still not proven:** the three `mail` endpoints, because they send real
+e-mail; and the two importer `execute` endpoints, which the server refuses.
 
 ## Caveats
 
