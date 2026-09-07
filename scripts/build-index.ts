@@ -11,6 +11,7 @@
  */
 
 import type { Endpoint, Param, Spec } from "./ir.ts";
+import { applyParamAdditions } from "./overrides.ts";
 
 const root = (p: string) => new URL(`../${p}`, import.meta.url);
 const MAX_DESCRIPTION = 200;
@@ -43,6 +44,9 @@ function condense(text: string): string {
 }
 
 const spec: Spec = JSON.parse(await Deno.readTextFile(root("spec/api.json")));
+// The index is what agents search to decide what to call, so it has to carry
+// the same corrections the generated client does.
+applyParamAdditions(spec);
 
 const entries: IndexEntry[] = spec.endpoints.map((e) => ({
   path: e.path,

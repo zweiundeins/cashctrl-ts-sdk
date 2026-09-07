@@ -5864,11 +5864,26 @@
                     "description": "Reorder before the target entry, after otherwise. Defaults to true. Possible values: true, false.",
                     "type": "boolean",
                     "default": "true"
+                  },
+                  "type": {
+                    "description": "The module the custom field groups belong to. Undocumented, but the request fails without it. Possible values: JOURNAL, ACCOUNT, INVENTORY_ARTICLE, INVENTORY_ASSET, ORDER, PERSON, FILE, SALARY_STATEMENT.",
+                    "type": "string",
+                    "enum": [
+                      "JOURNAL",
+                      "ACCOUNT",
+                      "INVENTORY_ARTICLE",
+                      "INVENTORY_ASSET",
+                      "ORDER",
+                      "PERSON",
+                      "FILE",
+                      "SALARY_STATEMENT"
+                    ]
                   }
                 },
                 "required": [
                   "ids",
-                  "target"
+                  "target",
+                  "type"
                 ]
               }
             }
@@ -6228,11 +6243,26 @@
                     "description": "Reorder before the target entry, after otherwise. Defaults to true. Possible values: true, false.",
                     "type": "boolean",
                     "default": "true"
+                  },
+                  "type": {
+                    "description": "The module the custom fields belong to. Undocumented, but the request fails without it. Possible values: JOURNAL, ACCOUNT, INVENTORY_ARTICLE, INVENTORY_ASSET, ORDER, PERSON, FILE, SALARY_STATEMENT.",
+                    "type": "string",
+                    "enum": [
+                      "JOURNAL",
+                      "ACCOUNT",
+                      "INVENTORY_ARTICLE",
+                      "INVENTORY_ASSET",
+                      "ORDER",
+                      "PERSON",
+                      "FILE",
+                      "SALARY_STATEMENT"
+                    ]
                   }
                 },
                 "required": [
                   "ids",
-                  "target"
+                  "target",
+                  "type"
                 ]
               }
             }

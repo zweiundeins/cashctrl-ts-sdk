@@ -30,7 +30,7 @@ import {
   splitPath,
   typeName,
 } from "./naming.ts";
-import { findOverride } from "./overrides.ts";
+import { applyParamAdditions, findOverride, openParams } from "./overrides.ts";
 
 const root = (p: string) => new URL(`../${p}`, import.meta.url);
 
@@ -43,6 +43,11 @@ try {
 }
 
 /* ------------------------------------------------------- request params -- */
+
+// Parameters the API requires but the reference omits entirely, folded in
+// before anything reads them, so the params interface and the OpenAPI
+// document agree with what the server actually wants.
+applyParamAdditions(spec);
 
 /**
  * Maps a documented param type to the TypeScript type the client accepts.
@@ -393,16 +398,24 @@ const collisions: string[] = [];
  * Endpoints whose payload CashCtrl wraps in `{ data: ... }` by convention:
  * `list` and `tree` return an array, `read` a single object.
  *
- * This is decided by the verb, NOT by what probing observed. Probing only ever
- * ran against one organisation, and where it failed or was skipped (20 of
- * these endpoints) the generated method used to hand back the raw envelope
- * instead of unwrapping it. That made `file.category.read()` behave unlike
- * `tax.read()` for no reason a caller could see. Probe evidence refines the
- * element *type*; it does not decide the *shape*.
+ * Decided by the verb rather than by what probing observed, because probing
+ * only ever ran against one organisation: where it failed or was skipped (20
+ * of these endpoints) the generated method used to hand back the raw envelope
+ * instead of unwrapping it, which made `file.category.read()` behave unlike
+ * `tax.read()` for no reason a caller could see.
+ *
+ * The one thing that does outrank the convention is a probe that *succeeded*
+ * and saw no envelope. A missing probe is absence of evidence; a successful
+ * one observing `raw` is evidence of absence, and unwrapping a `data` key
+ * that is not there yields `undefined` rather than a wrong type. Today that
+ * is `setting/read.json` alone - `salary/setting/read.json`, probed in the
+ * same run, is enveloped like everything else.
  */
 function envelopeKind(endpoint: Endpoint): "array" | "object" | null {
   if (endpoint.method !== "GET") return null;
   const verb = splitPath(endpoint.path).verb;
+  const probe = probed.responses[endpoint.path];
+  if (probe && !probe.error && probe.envelope === "raw") return null;
   if (verb === "list.json" || verb === "tree.json") return "array";
   if (verb === "read.json") return "object";
   return null;
@@ -555,8 +568,14 @@ function emitNode(node: Node): string | undefined {
     }
 
     const ret = qualify(returnType(endpoint, entity));
+    // An endpoint whose keys are chosen by the caller has no fixed param
+    // list to generate, and `Record<string, never>` would let it express
+    // nothing at all.
+    const open = openParams(endpoint.path);
     const signature = hasParams
       ? `params${allOptional ? "?" : ""}: M.${paramsName}, signal?: AbortSignal`
+      : open
+      ? `params?: ${open.tsType}, signal?: AbortSignal`
       : `params?: Record<string, never>, signal?: AbortSignal`;
 
     const doc = jsdoc([
@@ -567,7 +586,7 @@ function emitNode(node: Node): string | undefined {
       `@see ${spec.source}#${endpoint.anchor}`,
     ], "  ");
 
-    const body = callBody(endpoint, ret, hasParams);
+    const body = callBody(endpoint, ret, hasParams || open !== undefined);
     const isAsync = body.includes("(await ");
     members.push(
       `${doc}  ${isAsync ? "async " : ""}${name}(${signature}): ` +

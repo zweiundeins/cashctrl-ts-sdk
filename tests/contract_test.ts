@@ -23,10 +23,15 @@ import { assertEquals } from "@std/assert";
 import { CashCtrl } from "../src/client.ts";
 import type { Endpoint, Param, Spec } from "../scripts/ir.ts";
 import { methodName, propertyName, splitPath } from "../scripts/naming.ts";
+import { applyParamAdditions } from "../scripts/overrides.ts";
 
 const spec: Spec = JSON.parse(
   await Deno.readTextFile(new URL("../spec/api.json", import.meta.url)),
 );
+// The generated client is built from the corrected spec, so the assertions
+// have to be too - otherwise a parameter the reference omits is also a
+// parameter nothing checks, which is how it went missing in the first place.
+applyParamAdditions(spec);
 
 /**
  * A value satisfying `param`, chosen to exercise the interesting serialization

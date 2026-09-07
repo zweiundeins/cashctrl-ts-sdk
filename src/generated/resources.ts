@@ -5849,8 +5849,8 @@ export class SettingResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/setting/read.json
    */
-  async read(params?: Record<string, never>, signal?: AbortSignal): Promise<M.Setting> {
-    return (await this.#http.get<{ data: M.Setting }>("/api/v1/setting/read.json", undefined, signal)).data;
+  read(params?: Record<string, never>, signal?: AbortSignal): Promise<M.Setting> {
+    return this.#http.get<M.Setting>("/api/v1/setting/read.json", undefined, signal);
   }
 
   /**
@@ -5859,8 +5859,8 @@ export class SettingResource {
    * @see
    * https://app.cashctrl.com/static/help/en/api/index.html#/setting/update.json
    */
-  update(params?: Record<string, never>, signal?: AbortSignal): Promise<WriteEnvelope> {
-    return this.#http.post<WriteEnvelope>("/api/v1/setting/update.json", undefined, signal);
+  update(params?: Record<string, string | number | boolean | null>, signal?: AbortSignal): Promise<WriteEnvelope> {
+    return this.#http.post<WriteEnvelope>("/api/v1/setting/update.json", params, signal);
   }
 }
 

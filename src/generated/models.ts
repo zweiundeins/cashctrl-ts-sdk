@@ -3734,6 +3734,12 @@ export type CustomfieldGroupReorderParams = {
    * Defaults to `true`.
    */
   before?: boolean | null;
+  /**
+   * The module the custom field groups belong to. Undocumented, but the
+   * request fails without it. Possible values: JOURNAL, ACCOUNT,
+   * INVENTORY_ARTICLE, INVENTORY_ASSET, ORDER, PERSON, FILE, SALARY_STATEMENT.
+   */
+  type: "JOURNAL" | "ACCOUNT" | "INVENTORY_ARTICLE" | "INVENTORY_ASSET" | "ORDER" | "PERSON" | "FILE" | "SALARY_STATEMENT";
 };
 
 export type CustomfieldGroupUpdateParams = {
@@ -3874,6 +3880,12 @@ export type CustomfieldReorderParams = {
    * Defaults to `true`.
    */
   before?: boolean | null;
+  /**
+   * The module the custom fields belong to. Undocumented, but the request
+   * fails without it. Possible values: JOURNAL, ACCOUNT, INVENTORY_ARTICLE,
+   * INVENTORY_ASSET, ORDER, PERSON, FILE, SALARY_STATEMENT.
+   */
+  type: "JOURNAL" | "ACCOUNT" | "INVENTORY_ARTICLE" | "INVENTORY_ASSET" | "ORDER" | "PERSON" | "FILE" | "SALARY_STATEMENT";
 };
 
 export type CustomfieldUpdateParams = {
@@ -9610,7 +9622,7 @@ export type PersonCreateParams = {
    * A list of addresses (street, house number, zip, city, country). This is a
    * JSON array [{...},{...},...] with the following parameters:
    */
-  addresses?: string | null;
+  addresses?: string | readonly Record<string, unknown>[] | null;
   /**
    * An alternative name for this person (for organizational chart). This can
    * contain localized text. To add values in multiple languages, use the XML
@@ -9631,7 +9643,7 @@ export type PersonCreateParams = {
    * A list of bank accounts (IBAN, BIC). This is a JSON array
    * [{...},{...},...] with the following parameters:
    */
-  bankAccounts?: string | null;
+  bankAccounts?: string | readonly Record<string, unknown>[] | null;
   /**
    * Unstructured bank information, if IBAN/BIC not available. Otherwise use
    * bankAccounts .
@@ -10354,7 +10366,7 @@ export type PersonUpdateParams = {
    * A list of addresses (street, house number, zip, city, country). This is a
    * JSON array [{...},{...},...] with the following parameters:
    */
-  addresses?: string | null;
+  addresses?: string | readonly Record<string, unknown>[] | null;
   /**
    * An alternative name for this person (for organizational chart). This can
    * contain localized text. To add values in multiple languages, use the XML
@@ -10375,7 +10387,7 @@ export type PersonUpdateParams = {
    * A list of bank accounts (IBAN, BIC). This is a JSON array
    * [{...},{...},...] with the following parameters:
    */
-  bankAccounts?: string | null;
+  bankAccounts?: string | readonly Record<string, unknown>[] | null;
   /**
    * Unstructured bank information, if IBAN/BIC not available. Otherwise use
    * bankAccounts .
@@ -14345,13 +14357,13 @@ export type TaxCreateParams = {
    */
   code: string;
   /** The components of the tax code, up to two possible. */
-  components: string;
+  components: string | readonly Record<string, unknown>[];
   /**
    * Tax rates that are valid from a given date. Add a new tax rate here if the
    * official tax rate changes. Exactly one tax rate must exist without a valid
    * from date.
    */
-  rates: string;
+  rates: string | readonly Record<string, unknown>[];
   /**
    * A description for the tax code. This can contain localized text. To add
    * values in multiple languages, use the XML format like this:
@@ -14403,7 +14415,7 @@ export type TaxUpdateParams = {
    */
   code: string;
   /** The components of the tax code, up to two possible. */
-  components: string;
+  components: string | readonly Record<string, unknown>[];
   /** The ID of the tax code to update. */
   id: number;
   /**
@@ -14411,7 +14423,7 @@ export type TaxUpdateParams = {
    * official tax rate changes. Exactly one tax rate must exist without a valid
    * from date.
    */
-  rates: string;
+  rates: string | readonly Record<string, unknown>[];
   /**
    * A description for the tax code. This can contain localized text. To add
    * values in multiple languages, use the XML format like this:
