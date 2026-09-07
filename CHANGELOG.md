@@ -11,6 +11,27 @@ in minor releases as response inference improves.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-07
+
+Every write endpoint has now been executed against a real server, which turned
+up four defects in the generated surface. Fixing them changes types.
+
+**Upgrade from 0.4.0.** Two breaking type changes, both compile-time only:
+
+- 19 structured parameters change from `string` to an object array
+  (`person.addresses`, `bankAccounts`, `contacts`, `children`, `servicePeriods`,
+  `insuranceContracts`, `salary/insurance/type.codes`,
+  `salary/statement/update_multiple.attachments`, `tax.components`,
+  `tax.rates`). If you were passing `JSON.stringify(...)`, pass the array itself
+  — the serializer encodes it.
+- `customfield.reorder()` and `customfield.group.reorder()` gain a required
+  `type`. Neither could succeed without it, so there is no working call to
+  migrate.
+
+`setting.read()` starts returning the settings rather than `undefined`, and
+`setting.update()` starts accepting parameters. Neither breaks a call that
+worked before, because neither worked before.
+
 ### Added
 
 - `deno task write-test`: a write-path harness that drives all 192 POST
@@ -18,22 +39,57 @@ in minor releases as response inference improves.
   (master data, accounts, files, people, inventory, journal, orders, bank
   import, salary, year-end). Every call goes through the generated method, and a
   recording `fetch` produces a coverage report against `spec/api.json`, so write
-  coverage is measured rather than asserted. `--dry-run` runs the whole thing
-  offline against a stub, for checking the suites reach what they claim without
-  touching an organisation.
+  coverage is measured rather than asserted. Live result: 266 assertions,
+  192/192 endpoints, 2 failures, both server-side.
+- `--dry-run` runs the whole suite offline against a stub. It exists to keep the
+  coverage number honest: against a real server a broken chain and an uncovered
+  endpoint look identical in the totals.
 - The harness reads `CASHCTRL_TEST_DOMAINID`/`CASHCTRL_TEST_APIKEY` only, and
   refuses to run when they resolve to the same organisation as
   `CASHCTRL_DOMAINID`/`CASHCTRL_APIKEY` or when the target is not repeated as
-  `--org=`.
+  `--org=`. The year-end suite is opt-in behind `--all`, because completing a
+  fiscal period makes it permanently undeletable.
+
+### Fixed
+
+Four defects the write suite exposed, all corrected in `scripts/overrides.ts`
+with the evidence recorded next to each.
+
+- **19 structured parameters were generated as `string`.** CashCtrl documents a
+  structured param by giving it a nested parameter table, which the scraper
+  records as `fields`; for these 19 it also labels the type TEXT, and the
+  generator read the label rather than the table. `person.addresses` was typed
+  `string` despite eleven documented fields. A sub-table is the statement that a
+  value is structured — CashCtrl types the other 116 such params JSON itself —
+  so this is one rule rather than 19 entries, and it stops firing once upstream
+  fixes a label.
+- **`customfield/reorder` and `customfield/group/reorder` were uncallable.**
+  Both require a `type` naming the module, which appears nowhere in the
+  reference; without it the server answers "Type is missing" with no field
+  errors. A wrong type is recoverable, a missing parameter is not, so
+  `overrides.ts` gains `PARAM_ADDITIONS`.
+- **`setting.read()` returned `undefined`.** `setting/read.json` answers with a
+  flat object rather than the `{ data: ... }` envelope its verb implies. A probe
+  that _succeeded_ and saw no envelope now outranks the naming convention; a
+  missing probe still does not, so the 20 unprobed reads keep unwrapping.
+- **`setting.update()` sent no body.** It took `Record<string, never>`, a
+  signature that cannot express a request. It accepts the keys `setting/read`
+  returns and is now typed openly.
+
+All four corrections are applied to `spec/api.json` before the client, the
+OpenAPI document, the search index and the contract test read it — a consumer
+that skipped them would disagree with the others about what an endpoint takes,
+and `spec/index.json` is what an agent reads to decide what to call.
 
 ### Documented
 
-- README records what running the whole write surface against a live
-  organisation revealed: three endpoints the generated methods cannot call at
-  all (`customfield/reorder`, `customfield/group/reorder`, `setting/read`), four
-  parameters typed `string` that are really JSON, thirteen parameters documented
-  as optional that the server requires, and four server-side faults. None of
-  these are fixed yet; they are recorded so a fix can be scoped.
+- README records what the write surface revealed that is _not_ fixed here: a
+  list of parameters documented as optional that the server requires (left
+  alone, since several are only mandatory when the organisation lacks a sequence
+  number), and four server-side faults — including `notifyType:
+  "NONE"`, a
+  documented value, answering 500 on every `update_recurrence` endpoint, and
+  both importer `execute` endpoints failing outright.
 
 ## [0.4.0] - 2026-09-04
 
@@ -222,7 +278,8 @@ envelope.
   types are inferred from one organisation's live data across 95 of 376
   endpoints, so they are best-effort. See the README's Caveats section.
 
-[Unreleased]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/zweiundeins/cashctrl-ts-sdk/compare/v0.1.0...v0.2.0
