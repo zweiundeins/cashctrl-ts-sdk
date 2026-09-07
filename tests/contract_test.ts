@@ -16,7 +16,7 @@
  *   - values are encoded the way CashCtrl expects
  *
  * What this cannot tell you: whether CashCtrl accepts the request. That needs
- * a real organisation, and for writes, a disposable one. See README "Testing".
+ * a real organisation, and for writes, a disposable one. See docs/testing.md.
  */
 
 import { assertEquals } from "@std/assert";

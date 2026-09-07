@@ -83,12 +83,11 @@ and `spec/index.json` is what an agent reads to decide what to call.
 
 ### Documented
 
-- README records what the write surface revealed that is _not_ fixed here: a
-  list of parameters documented as optional that the server requires (left
-  alone, since several are only mandatory when the organisation lacks a sequence
-  number), and four server-side faults — including `notifyType:
-  "NONE"`, a
-  documented value, answering 500 on every `update_recurrence` endpoint, and
+- `docs/api-notes.md` records what the write surface revealed that is _not_
+  fixed here: a list of parameters documented as optional that the server
+  requires (left alone, since several are only mandatory when the organisation
+  lacks a sequence number), and four server-side faults — including a documented
+  `notifyType` value answering 500 on every `update_recurrence` endpoint, and
   both importer `execute` endpoints failing outright.
 
 ## [0.4.0] - 2026-09-04
