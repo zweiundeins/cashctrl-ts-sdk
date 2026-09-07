@@ -343,7 +343,7 @@ recording `fetch` collects the paths actually reached, so the run ends with a
 coverage report measured against every POST in `spec/api.json` instead of a
 claim. Each suite tears down what it created, last created first.
 
-Last full run against a disposable organisation: **265 assertions passed, 2
+Last full run against a disposable organisation: **266 assertions passed, 2
 failed, 192/192 endpoints reached**. The two failures are server-side, see
 below.
 
@@ -368,34 +368,50 @@ never mistaken for a leak.
 #### What the write paths actually revealed
 
 Running the whole write surface against a live organisation turned up places
-where CashCtrl's published reference and its behaviour disagree. The suite works
-around each one and says so; the workarounds are worth knowing about because
-they apply to any caller, not just this test.
+where CashCtrl's published reference and its behaviour disagree. Four of those
+were bugs in this SDK and are now fixed, in
+[`scripts/overrides.ts`](scripts/overrides.ts), which is the single reviewable
+place where the generator knowingly departs from the scraped docs. Every entry
+there records how the deviation was verified.
 
-**Bugs in this SDK, inherited from the docs** - these three are reached only
-through `cc.http` because the generated method cannot express the request:
+**Fixed: parameters the reference omits entirely.** `customfield/reorder` and
+`customfield/group/reorder` require a `type` naming the module (`PERSON`,
+`ORDER`, ...). Without it the server answers "Type is missing" with no field
+errors, so the generated methods could never succeed whatever the caller passed.
+`overrides.ts` adds the parameter back, and the search index and OpenAPI
+document carry it too — an agent reading the index would otherwise keep
+generating the call that cannot work.
 
-- `customfield/reorder` and `customfield/group/reorder` require a `type`
-  parameter that appears nowhere in the reference. Without it the server answers
-  "Type is missing", so the generated methods can never succeed.
-- `setting/read.json` answers with a flat object rather than the `{ data: ... }`
-  envelope every other read uses, so the generated `read()` unwraps a key that
-  is not there and returns `undefined`.
-- `setting/update` has no documented parameters, so the generated method has
-  none to send. Settings cannot be changed through the typed surface.
+**Fixed: `setting/read.json` is not enveloped.** Every other `read.json` returns
+`{ data: ... }`; this one returns the settings object directly, so the generated
+`read()` unwrapped a key that was not there and handed back `undefined`. The
+generator now lets a _successful_ probe that observed no envelope outrank the
+naming convention. A missing probe still does not — absence of evidence is not
+evidence of absence, and that distinction is what keeps the other 20 unprobed
+reads unwrapping correctly.
 
-**Parameters documented as TEXT that are really JSON.** The generated type says
-`string`; passing a string produces a 500 or a validation error. Encode with
-`JSON.stringify`: `tax.components`, `tax.rates`, `person.addresses`,
-`person.bankAccounts`.
+**Fixed: `setting/update` takes caller-chosen keys.** The reference documents no
+parameters, which generated `Record<string, never>` — a signature that cannot
+express any request. It accepts the same keys `setting/read` returns, so it is
+now typed openly and the suite round-trips a real setting.
 
-**Parameters documented as optional that the server requires**: `parentId` on
-`account/category/create`; `description` on `tax/create`; `layoutId` on
-`order/category/create` and `salary/template/create`; `date` on
+**Fixed: four parameters documented as TEXT that are really JSON arrays** —
+`tax.components`, `tax.rates`, `person.addresses`, `person.bankAccounts`. The
+serializer already JSON-encodes an array of objects, so these now accept one
+directly; the string form still works for callers who encoded it themselves.
+
+**Still yours to work around: parameters documented as optional that the server
+requires.** Not fixed, deliberately: several of them are only mandatory when the
+organisation lacks a matching sequence number, so making them required in the
+type would break the callers for whom they are genuinely optional.
+
+`parentId` on `account/category/create`; `description` on `tax/create`;
+`layoutId` on `order/category/create` and `salary/template/create`; `date` on
 `order/bookentry/update` and `salary/bookentry/create`; `nr` on
 `inventory/article/create`, `order/create` and `salary/statement/create`; `nr`
-and `purchaseCreditId` on `inventory/asset/create`; and all four date fields on
-`fiscalperiod/update`, whose only documented requirement is `id`.
+and `purchaseCreditId` on `inventory/asset/create`; `mailTo` on all three `mail`
+endpoints; and all four date fields on `fiscalperiod/update`, whose only
+documented requirement is `id`.
 
 **Server-side faults**, reported as failures rather than worked around:
 
@@ -414,12 +430,14 @@ three-column file outright and needs a fourth; `mapping` takes the importer's
 own field constants (`COMPANY`, `NAME_EN`, ...) from the `mapping_combo`
 endpoint, not field names on the entity; an order must be in a status flagged
 `isBook` before it accepts a book entry or a payment, and the `amount` parameter
-does not override that; and `file/prepare` returns
+does not override that; `file/prepare` returns
 `{ data: [{ fileId, writeUrl }] }` while being typed as the generic
-`WriteEnvelope`.
+`WriteEnvelope`; and a fiscal period that has been completed can never be
+deleted again, reopening included.
 
-**What is still not proven:** the three `mail` endpoints, because they send real
-e-mail; and the two importer `execute` endpoints, which the server refuses.
+**What is still not proven:** `person/import/execute` and
+`inventory/article/import/execute`, which the server refuses. Every other write
+endpoint has been executed against a real server.
 
 ## Caveats
 

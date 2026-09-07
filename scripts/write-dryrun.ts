@@ -90,10 +90,12 @@ function readGet(path: string, params: URLSearchParams): unknown {
       return { data: { id: Number(params.get("id")), amount: 12.34 } };
     case "/api/v1/journal/list.json":
       return { data: [] };
-    case "/api/v1/setting/read.json":
-      // Deliberately not enveloped: the real endpoint is not either, and the
-      // settings suite asserts that the generated read() trips over it.
-      return { THOUSAND_SEPARATOR: "'" };
+    case "/api/v1/setting/read.json": {
+      // Not enveloped, because the real endpoint is not either. Echoes the
+      // last update so the settings suite can read its own write back.
+      const written = lastCreate.get("/api/v1/setting/update.json");
+      return { THOUSAND_SEPARATOR: written?.get("THOUSAND_SEPARATOR") ?? "'" };
+    }
     case "/api/v1/account/category/tree.json":
       return { data: [{ id: 1, parentId: null, name: "Assets" }] };
     case "/api/v1/salary/layout/list.json":
@@ -184,7 +186,10 @@ export function stubFetch(): typeof globalThis.fetch {
       const form = body instanceof URLSearchParams
         ? body
         : new URLSearchParams(typeof body === "string" ? body : "");
-      if (url.pathname.endsWith("/create.json")) {
+      if (
+        url.pathname.endsWith("/create.json") ||
+        url.pathname === "/api/v1/setting/update.json"
+      ) {
         lastCreate.set(url.pathname, form);
       }
       return json(writeResponse(url.pathname));

@@ -245,19 +245,14 @@ const masterdata: Suite = {
           `customfield/group ${otherGroupId}`,
           () => cc.customfield.group.delete({ ids: otherGroupId }),
         );
-        // `type` is required by the server but appears nowhere in the
-        // published reference, so CustomfieldGroupReorderParams has no field
-        // for it and the typed method always fails with "Type is missing".
-        ctx.gap(
-          "customfield/group/reorder",
-          "server requires an undocumented `type`, absent from the " +
-            "generated params",
-        );
+        // `type` appears nowhere in the published reference but the server
+        // refuses without it ("Type is missing"); scripts/overrides.ts adds
+        // it back, which is what makes this callable at all.
         await ctx.step(
-          "customfield/group reorder (via cc.http)",
+          "customfield/group reorder",
           () =>
-            cc.http.post("/api/v1/customfield/group/reorder.json", {
-              ids: String(groupId),
+            cc.customfield.group.reorder({
+              ids: groupId,
               target: otherGroupId,
               type: "PERSON",
             }),
@@ -293,15 +288,11 @@ const masterdata: Suite = {
             `customfield ${otherFieldId}`,
             () => cc.customfield.delete({ ids: otherFieldId }),
           );
-          ctx.gap(
-            "customfield/reorder",
-            "same undocumented `type` as customfield/group/reorder",
-          );
           await ctx.step(
-            "customfield reorder (via cc.http)",
+            "customfield reorder",
             () =>
-              cc.http.post("/api/v1/customfield/reorder.json", {
-                ids: String(fieldId),
+              cc.customfield.reorder({
+                ids: fieldId,
                 target: otherFieldId,
                 type: "PERSON",
               }),
@@ -530,21 +521,19 @@ const accounts: Suite = {
       rounding: 0.05,
     }, { name: `${t}-round2` });
 
-    // `components` and `rates` are documented as TEXT and generated as
-    // `string`, but the server sends and expects JSON arrays. Cloning an
-    // existing code and re-encoding it is the only way through; passing the
-    // string the type asks for produces a 500.
+    // `components` and `rates` are documented as TEXT but are really JSON
+    // arrays; scripts/overrides.ts widens both so an array can be passed
+    // straight through and the serializer encodes it. Clone an existing code
+    // rather than invent one: neither array's fields are documented.
     const sample = w.sampleTax;
     if (!sample) {
       ctx.check("tax: an existing code to clone", false, "none in this org");
     } else {
-      const withoutIds = (rows: unknown) =>
-        JSON.stringify(
-          (Array.isArray(rows) ? rows : []).map((row) => {
-            const { id: _id, ...rest } = row as Record<string, unknown>;
-            return rest;
-          }),
-        );
+      const withoutIds = (rows: unknown): Record<string, unknown>[] =>
+        (Array.isArray(rows) ? rows : []).map((row) => {
+          const { id: _id, ...rest } = row as Record<string, unknown>;
+          return rest;
+        });
       // `description` is documented as optional; the server rejects it empty.
       await crud(ctx, "tax", cc.tax as unknown as Crud, {
         code: `${t.slice(-6)}`,
@@ -640,9 +629,9 @@ const files: Suite = {
  * Suites deliberately do not share records: cleanup runs at the end of each
  * suite, so anything one suite creates is gone before the next one starts.
  *
- * `addresses` and `bankAccounts` are typed `string | null` because the docs
- * call them TEXT, but both are JSON arrays; without them a payment to this
- * person fails with "Recipient: Address must be set".
+ * `addresses` and `bankAccounts` are JSON arrays despite being documented as
+ * TEXT; without them a payment to this person fails with "Recipient: Address
+ * must be set".
  */
 async function createPayee(ctx: Ctx): Promise<number | undefined> {
   const id = await ctx.step("person create (payee)", async () =>
@@ -654,7 +643,7 @@ async function createPayee(ctx: Ctx): Promise<number | undefined> {
         isVendor: true,
         // Salary statements refuse a person that is not flagged an employee.
         isEmployee: true,
-        addresses: JSON.stringify([
+        addresses: [
           {
             type: "MAIN",
             address: "Teststrasse 1",
@@ -662,14 +651,14 @@ async function createPayee(ctx: Ctx): Promise<number | undefined> {
             city: "Bern",
             country: "CHE",
           },
-        ]),
-        bankAccounts: JSON.stringify([
+        ],
+        bankAccounts: [
           {
             iban: "CH9300762011623852957",
             bic: "POFICHBEXXX",
             type: "DEFAULT",
           },
-        ]),
+        ],
       }),
     ));
   if (id !== undefined) {
@@ -750,10 +739,10 @@ const persons: Suite = {
       company: `${t} AG`,
       firstName: "Test",
       lastName: "Person",
-      // Typed `string | null` but really a JSON array, same as tax
-      // components. An address is needed before an order to this person can
-      // be paid: "Recipient: Address must be set."
-      addresses: JSON.stringify([
+      // Documented as TEXT, really a JSON array - widened in overrides.ts.
+      // An address is needed before an order to this person can be paid:
+      // "Recipient: Address must be set."
+      addresses: [
         {
           type: "MAIN",
           address: "Teststrasse 1",
@@ -761,16 +750,16 @@ const persons: Suite = {
           city: "Bern",
           country: "CHE",
         },
-      ]),
-      // Same string-typed-JSON story. Needed before this person can be paid:
-      // without it the payment complains "Recipient: Address must be set".
-      bankAccounts: JSON.stringify([
+      ],
+      // Same story. Needed before this person can be paid: without it the
+      // payment complains "Recipient: Address must be set".
+      bankAccounts: [
         {
           iban: "CH9300762011623852957",
           bic: "POFICHBEXXX",
           type: "DEFAULT",
         },
-      ]),
+      ],
       isVendor: true,
       // Salary statements refuse a person that is not flagged an employee.
       isEmployee: true,
@@ -1788,42 +1777,53 @@ const salary: Suite = {
   },
 };
 
-/** Organisation settings. */
+/** Organisation settings: a real round-trip, then put it back. */
 const settings: Suite = {
   name: "settings",
   async run(ctx) {
-    // setting/read.json answers with a flat object, not the `{ data: ... }`
-    // envelope every other read uses, so the generated `read()` unwraps a
-    // key that is not there and hands back undefined.
-    const enveloped = await ctx.step(
-      "setting read",
-      () => ctx.cc.setting.read(),
-    );
-    if (enveloped === undefined) {
-      ctx.gap(
-        "setting/read.json",
-        "response is not wrapped in `data`, so the generated read() " +
-          "returns undefined",
-      );
+    const cc = ctx.cc;
+
+    // setting/read.json answers with a flat object rather than the
+    // `{ data: ... }` envelope every other read uses. The generator now
+    // follows the probe evidence for that one endpoint instead of the verb
+    // convention, so this returns the settings rather than undefined.
+    const before = await ctx.step("setting read", () => cc.setting.read()) as
+      | Record<string, unknown>
+      | undefined;
+    if (
+      !ctx.check(
+        "setting read returned settings",
+        before !== undefined && Object.keys(before).length > 0,
+        `${Object.keys(before ?? {}).length} keys`,
+      )
+    ) return;
+
+    // The reference documents no parameters for setting/update, but it takes
+    // the keys read returns. THOUSAND_SEPARATOR is the most harmless one:
+    // display-only, and restored below.
+    const original = before!.THOUSAND_SEPARATOR;
+    if (typeof original !== "string") {
+      ctx.check("settings: THOUSAND_SEPARATOR to round-trip", false);
+      return;
     }
-    const raw = await ctx.step(
-      "setting read (via cc.http)",
-      () =>
-        ctx.cc.http.get<Record<string, unknown>>("/api/v1/setting/read.json"),
-    );
-    ctx.check(
-      "setting read returned settings",
-      raw !== undefined && Object.keys(raw).length > 0,
-      `${Object.keys(raw ?? {}).length} keys`,
+    const swapped = original === "." ? "'" : ".";
+    ctx.defer(
+      "restore THOUSAND_SEPARATOR",
+      () => cc.setting.update({ THOUSAND_SEPARATOR: original }),
     );
 
-    // The scraped reference documents no parameters for setting/update, so the
-    // generated method has none to send and this posts an empty body. Calling
-    // it proves the path and verb; changing a setting through the typed
-    // surface is not currently possible.
     await ctx.step(
-      "setting update (no documented params)",
-      () => ctx.cc.setting.update(),
+      "setting update",
+      () => cc.setting.update({ THOUSAND_SEPARATOR: swapped }),
+    );
+    const after = await ctx.step(
+      "setting read back",
+      () => cc.setting.read(),
+    ) as Record<string, unknown> | undefined;
+    ctx.check(
+      "setting update changed the value",
+      after?.THOUSAND_SEPARATOR === swapped,
+      `${original} -> ${after?.THOUSAND_SEPARATOR}`,
     );
   },
 };
