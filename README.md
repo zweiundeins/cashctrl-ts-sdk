@@ -158,3 +158,7 @@ return the generic `WriteEnvelope`. Re-probing against your own organisation
 ## License
 
 MIT
+
+## Maintainer
+
+Maintained by [zwei und eins gmbh](https://zweiundeins.gmbh), Aarberg, Switzerland.
