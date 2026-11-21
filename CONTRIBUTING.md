@@ -89,6 +89,12 @@ Note that the automated PR regenerates against the *existing*
 `unknown`. Run `deno task probe` against a real organisation and push to the
 PR branch before merging if you want them typed. The PR checklist says so.
 
+CashCtrl announces API changes by email to its API users, and not every one
+reaches the reference, so the weekly scrape can miss it. On such an email, run
+`deno task probe` and `deno task generate`, check the change against the
+announcement, and release; then run `scripts/sync-spec.sh` in
+cashctrl-go-sdk.
+
 To check by hand:
 
 ```sh
